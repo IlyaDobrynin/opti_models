@@ -6,7 +6,7 @@ from opti_models.models import models_facade
 logging.basicConfig(level=logging.INFO)
 
 
-def test_classification(show: bool):
+def test_classification(show: int):
     backbone_names = [
         "resnet18", "resnet34", "resnet50", "resnet101", "resnet152"
     ]
@@ -47,12 +47,13 @@ def parse_args():
     test_config_default = 'c'
     parser = ArgumentParser()
     parser.add_argument('--test_config', default=test_config_default, type=str, help="Type of tests to run")
-    parser.add_argument('--show_models', default=False, type=bool, help="Flag to show models parameters")
+    parser.add_argument('--show_models', default=0, type=int, help="Flag to show models parameters")
     return parser.parse_args()
 
 
 def main(args):
     if 'c' in args.test_config:
+        print(args.show_models, type(args.show_models))
         test_classification(show=args.show_models)
 
 
