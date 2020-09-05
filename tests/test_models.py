@@ -1,10 +1,12 @@
 from torchsummary import summary
 from argparse import ArgumentParser
+import logging
 import torch
 from opti_models.models import models_facade
+logging.basicConfig(level=logging.INFO)
 
 
-def test_classification():
+def test_classification(show: bool):
     backbone_names = [
         "resnet18", "resnet34", "resnet50", "resnet101", "resnet152"
     ]
@@ -17,23 +19,41 @@ def test_classification():
         depthwise=False
     )
     models_facade_obj = models_facade.ModelFacade(task='classification')
-    for backbone_name in backbone_names:
-        model_parameters['backbone'] = backbone_name
-        model = models_facade_obj.get_model_class(model_definition='basic_classifier')(**model_parameters)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = model.to(device)
-        summary(model, input_size=input_size)
+
+    passed_list = []
+    failed_list = []
+    for i, backbone_name in enumerate(backbone_names):
+        try:
+            model_parameters['backbone'] = backbone_name
+            model = models_facade_obj.get_model_class(model_definition='basic_classifier')(**model_parameters)
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            model = model.to(device)
+            passed_list.append((backbone_name, 'passed'))
+            if show:
+                summary(model, input_size=input_size)
+        except Exception as e:
+            failed_list.append((backbone_name, e))
+
+    if len(failed_list) == 0:
+        logging.info("\tCLASSIFICATION TESTS PASSED")
+    else:
+        logging.info("\tCLASSIFICATION TESTS FAILED")
+
+    for backbone_name, msg in failed_list + passed_list:
+        logging.info(f"\t\tBACKBONE: {backbone_name}  MESSAGE: {msg}")
 
 
 def parse_args():
     test_config_default = 'c'
     parser = ArgumentParser()
     parser.add_argument('--test_config', default=test_config_default, type=str, help="Type of tests to run")
+    parser.add_argument('--show_models', default=False, type=bool, help="Flag to show models parameters")
     return parser.parse_args()
 
 
 def main(args):
-    test_classification()
+    if 'c' in args.test_config:
+        test_classification(show=args.show_models)
 
 
 if __name__ == '__main__':
