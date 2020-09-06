@@ -4,6 +4,14 @@ from .custom_convolutions import DepthwiseConv2d, PartialConv2d, Conv2dSamePad
 from .custom_activations import Mish
 
 
+class Identity(nn.Module):
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x
+
+
 class Conv(nn.Module):
     def __init__(
             self,

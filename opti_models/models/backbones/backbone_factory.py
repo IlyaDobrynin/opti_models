@@ -3,16 +3,25 @@
 Simple backbones factory
 """
 from . import (
-    resnet18, resnet34, resnet50, resnet101, resnet152
+    resnet18, resnet34, resnet50, resnet101, resnet152,
+    mobilenetv2_w1, mobilenetv2_wd2, mobilenetv2_wd4, mobilenetv2_w3d4
 )
 
 
 BACKBONES = {
-    'resnet152': resnet152,
-    'resnet101': resnet101,
-    'resnet50': resnet50,
-    'resnet34': resnet34,
-    'resnet18': resnet18,
+    # Resnets
+    "resnet152": resnet152,
+    "resnet101": resnet101,
+    "resnet50": resnet50,
+    "resnet34": resnet34,
+    "resnet18": resnet18,
+
+    # Mobilenets
+    "mobilenetv2_w1": mobilenetv2_w1,
+    "mobilenetv2_wd2": mobilenetv2_wd2,
+    "mobilenetv2_wd4": mobilenetv2_wd4,
+    "mobilenetv2_w3d4": mobilenetv2_w3d4,
+
 }
 
 

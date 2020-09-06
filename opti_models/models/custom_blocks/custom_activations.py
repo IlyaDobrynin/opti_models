@@ -4,18 +4,6 @@ import torch.nn.functional as F
 
 
 class Mish(nn.Module):
-    '''
-    Applies the mish function element-wise:
-    mish(x) = x * tanh(softplus(x)) = x * tanh(ln(1 + exp(x)))
-    Shape:
-        - Input: (N, *) where * means, any number of additional
-          dimensions
-        - Output: (N, *), same shape as the input
-    Examples:
-        >>> m = Mish()
-        >>> input = torch.randn(2)
-        >>> output = m(input)
-    '''
     def __init__(self):
         super().__init__()
 
@@ -24,3 +12,34 @@ class Mish(nn.Module):
 
     def forward(self, input):
         return self.mish(input)
+
+
+class Swish(nn.Module):
+    def forward(self, x):
+        return x * torch.sigmoid(x)
+
+
+class HSigmoid(nn.Module):
+    """
+    Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
+    https://arxiv.org/abs/1905.02244.
+    """
+    def forward(self, x):
+        return F.relu6(x + 3.0, inplace=True) / 6.0
+
+
+class HSwish(nn.Module):
+    """
+    H-Swish activation function from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
+
+    Parameters:
+    ----------
+    inplace : bool
+        Whether to use inplace version of the module.
+    """
+    def __init__(self, inplace=False):
+        super(HSwish, self).__init__()
+        self.inplace = inplace
+
+    def forward(self, x):
+        return x * F.relu6(x + 3.0, inplace=self.inplace) / 6.0

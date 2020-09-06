@@ -1,0 +1,1 @@
+from .mobilenet_v2 import mobilenetv2_w1, mobilenetv2_wd2, mobilenetv2_wd4, mobilenetv2_w3d4

@@ -8,7 +8,8 @@ logging.basicConfig(level=logging.INFO)
 
 def test_classification(show: int):
     backbone_names = [
-        "resnet18", "resnet34", "resnet50", "resnet101", "resnet152"
+        "resnet18", "resnet34", "resnet50", "resnet101", "resnet152",
+        "mobilenetv2_w1", "mobilenetv2_w3d4", "mobilenetv2_wd2", "mobilenetv2_wd4"
     ]
     input_size = (3, 224, 224)
 
@@ -33,6 +34,7 @@ def test_classification(show: int):
                 summary(model, input_size=input_size)
         except Exception as e:
             failed_list.append((backbone_name, e))
+            # raise e
 
     if len(failed_list) == 0:
         logging.info("\tCLASSIFICATION TESTS PASSED")
@@ -53,7 +55,6 @@ def parse_args():
 
 def main(args):
     if 'c' in args.test_config:
-        print(args.show_models, type(args.show_models))
         test_classification(show=args.show_models)
 
 
