@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 
 
 class ImagenetDataset(Dataset):
-    def __init__(self, data_df: pd.DataFrame):
+    def __init__(self, data_df: pd.DataFrame, in_size: int = 224):
         self.data_df = data_df
         if "names" in data_df.columns:
             self.file_names = data_df['names']
@@ -17,7 +17,7 @@ class ImagenetDataset(Dataset):
             )
 
         self.augmentations = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((in_size, in_size)),
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.485, 0.456, 0.406],

@@ -18,6 +18,26 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mobilenetv2_wd2', '1493', 'b82d79f6730eac625e6b55b0618bff8f7a1ed86d', 'v0.0.170', 'MobileNetV2 x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w3d4', '1082', '8656de5a8d90b29779c35c5ce521267c841fd717', 'v0.0.230', 'MobileNetV2 x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w1', '0887', '13a021bca5b679b76156829743f7182da42e8bb6', 'v0.0.213', 'MobileNetV2 x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+
+    ('efficientnet_b0', '0752', '0e3861300b8f1d1d0fb1bd15f0e06bba1ad6309b', 'v0.0.364', 'EfficientNet-B0', '1905.11946', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('efficientnet_b1', '0638', 'ac77bcd722dc4f3edfa24b9fb7b8f9cece3d85ab', 'v0.0.376', 'EfficientNet-B1', '1905.11946', 'in1k', 240, 0.882, 200, ''),  # noqa
+    ('efficientnet_b0b', '0702', 'ecf61b9b50666a6b444a9d789a5ff1087c65d0d8', 'v0.0.403', 'EfficientNet-B0b', '1905.11946', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b1b', '0594', '614e81663902850a738fa6c862fe406ecf205f73', 'v0.0.403', 'EfficientNet-B1b', '1905.11946', 'in1k', 240, 0.882, 200, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b2b', '0527', '531f10e6898778b7c3a82c2c149f8b3e6393a892', 'v0.0.403', 'EfficientNet-B2b', '1905.11946', 'in1k', 260, 0.890, 100, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b3b', '0445', '3c5fbba8c86121d4bc3bbc169804f24dd4c3d1f6', 'v0.0.403', 'EfficientNet-B3b', '1905.11946', 'in1k', 300, 0.904, 90, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b4b', '0389', '6305bfe688b261f0d4fef6829f520d5c98c46301', 'v0.0.403', 'EfficientNet-B4b', '1905.11946', 'in1k', 380, 0.922, 80, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b5b', '0337', 'e1c2ffcf710cbd3c53b9c08723282a370906731c', 'v0.0.403', 'EfficientNet-B5b', '1905.11946', 'in1k', 456, 0.934, 70, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b6b', '0323', 'e5c1d7c35fcff5fac07921a7696f7c04aba84012', 'v0.0.403', 'EfficientNet-B6b', '1905.11946', 'in1k', 528, 0.942, 60, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b7b', '0322', 'b9c5965a1e2572aaa772e20e8a2e3af7b4bee9a6', 'v0.0.403', 'EfficientNet-B7b', '1905.11946', 'in1k', 600, 0.949, 50, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b0c', '0675', '21778c6e3b5a1b9b08b60c3e69401ce7e12bead4', 'v0.0.433', 'EfficientNet-B0с', '1905.11946', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b1c', '0569', '239ed6a412530f60f810b29807da70c8ca63d8cc', 'v0.0.433', 'EfficientNet-B1с', '1905.11946', 'in1k', 240, 0.882, 200, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b2c', '0503', 'be48d3d79f25a13a807b137d8a7ced41e8aab2bf', 'v0.0.433', 'EfficientNet-B2с', '1905.11946', 'in1k', 260, 0.890, 100, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b3c', '0442', 'ea7080aba3fc20ac25c3c925bfadf1e8c1e7df4d', 'v0.0.433', 'EfficientNet-B3с', '1905.11946', 'in1k', 300, 0.904, 90, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b4c', '0369', '5954cc05cfba3b0c8ee488b4488354fc0cef6623', 'v0.0.433', 'EfficientNet-B4с', '1905.11946', 'in1k', 380, 0.922, 80, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b5c', '0310', '589fefc6de5d93b54698b5b03f1e05637f9d0cb6', 'v0.0.433', 'EfficientNet-B5с', '1905.11946', 'in1k', 456, 0.934, 70, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b6c', '0296', '546e61da82bec69e3db5870b8df977e4615f7b32', 'v0.0.433', 'EfficientNet-B6с', '1905.11946', 'in1k', 528, 0.942, 60, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b7c', '0288', '13d683f2ca56c1007acd9ad0be450f45efeec828', 'v0.0.433', 'EfficientNet-B7с', '1905.11946', 'in1k', 600, 0.949, 50, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b8c', '0276', 'a9973d66d599c4e83029577842c039a20799f2c9', 'v0.0.433', 'EfficientNet-B8с', '1905.11946', 'in1k', 672, 0.954, 50, '[rwightman/pyt...models]*'),  # noqa
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
