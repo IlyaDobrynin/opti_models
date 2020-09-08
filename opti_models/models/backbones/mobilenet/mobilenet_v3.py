@@ -10,14 +10,9 @@ __all__ = ['MobileNetV3', 'mobilenetv3_small_w7d20', 'mobilenetv3_small_wd2', 'm
 import os
 import torch.nn as nn
 import torch.nn.init as init
-
-from opti_models.models.backbones.utils.custom_blocks import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
-from opti_models.models.custom_blocks.custom_activations import HSwish
-from opti_models.models.backbones.utils.model_store import download_model
-
-# from ..utils.custom_blocks import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
-# from ...custom_blocks.custom_activations import HSwish
-# from ..utils.model_store import download_model
+from ..utils.custom_blocks import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
+from ...custom_blocks.custom_activations import HSwish
+from ..utils.model_store import download_model
 
 
 class MobileNetV3Unit(nn.Module):

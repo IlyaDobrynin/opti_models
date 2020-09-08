@@ -24,3 +24,11 @@ EFFICIENTNET_LAYERS = (
     ['stage4'],
     ['stage5', 'final_block']
 )
+
+MIXNET_LAYERS = (
+    ['init_block'],
+    ['stage1'],
+    ['stage2'],
+    ['stage3'],
+    ['stage4', 'final_block']
+)
