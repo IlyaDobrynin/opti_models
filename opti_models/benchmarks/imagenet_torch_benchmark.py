@@ -93,14 +93,10 @@ class SimpleBenchmark:
         top_1_acc = self.top_n_accuracy(preds=pred_labels, truths=true_labels, n=1)
         top_5_acc = self.top_n_accuracy(preds=pred_labels, truths=true_labels, n=5)
         logging.info(f"\tBENCHMARK DONE FOR {self.model_name}")
-        logging.info(f"\t\tTOP 1 ACCURACY: {top_1_acc * 100:.2f}\tTOP 1 ERROR: {(1 - top_1_acc) * 100:.2f}")
-        logging.info(f"\t\tTOP 5 ACCURACY: {top_5_acc * 100:.2f}\tTOP 5 ERROR: {(1 - top_5_acc) * 100:.2f}")
+        logging.info(f"\tTOP 1 ACCURACY: {top_1_acc * 100:.2f}\tTOP 1 ERROR: {(1 - top_1_acc) * 100:.2f}")
+        logging.info(f"\tTOP 5 ACCURACY: {top_5_acc * 100:.2f}\tTOP 5 ERROR: {(1 - top_5_acc) * 100:.2f}")
 
-    def process(self, path_to_images: str, path_to_labels: str):
-        labels_df = self._prepare_data(path_to_images=path_to_images, path_to_labels=path_to_labels)
-        model = self._load_model()
-        dataloader = self._make_dataloader(data_df=labels_df)
-
+    def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module):
         preds_dict = {}
         avg_batch_time = []
         for batch in tqdm(dataloader, total=len(dataloader)):
@@ -110,7 +106,14 @@ class SimpleBenchmark:
             preds = F.softmax(model(inputs), dim=-1).data.cpu().numpy()
             avg_batch_time.append(time() - batch_time)
             preds_dict.update({name: label for name, label in zip(names, preds)})
-        logging.info(f"Average fps: {self.batch_size / np.mean(avg_batch_time)}")
+        logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
+        return preds_dict
+
+    def process(self, path_to_images: str, path_to_labels: str):
+        labels_df = self._prepare_data(path_to_images=path_to_images, path_to_labels=path_to_labels)
+        model = self._load_model()
+        dataloader = self._make_dataloader(data_df=labels_df)
+        preds_dict = self._inference_loop(dataloader=dataloader, model=model)
         self._compute_metrics(trues_df=labels_df, preds=preds_dict)
 
 
