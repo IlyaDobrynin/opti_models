@@ -123,5 +123,5 @@ if __name__ == '__main__':
     model_name = 'mixnet_l'
     in_size = 224
 
-    bench_obj = SimpleBenchmark(model_name=model_name, batch_size=64, workers=11, in_size=in_size)
+    bench_obj = SimpleBenchmark(model_name=model_name, batch_size=24, workers=11, in_size=in_size)
     preds = bench_obj.process(path_to_images=path_to_images, path_to_labels=path_to_class_names)

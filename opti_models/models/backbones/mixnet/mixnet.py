@@ -6,6 +6,7 @@
 __all__ = ['MixNet', 'mixnet_s', 'mixnet_m', 'mixnet_l']
 
 import os
+import torch
 import torch.nn as nn
 import torch.nn.init as init
 from ..utils.custom_blocks import round_channels, get_activation_layer, conv1x1_block, conv3x3_block, dwconv3x3_block, SEBlock
