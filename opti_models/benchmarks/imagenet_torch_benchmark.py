@@ -11,9 +11,11 @@ from torchsummary import summary
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
-from ido_cv import draw_images
+# from ido_cv import draw_images
 from opti_models.models import models_facade
 from opti_models.benchmarks.datasets import ImagenetDataset
+
+logging.basicConfig(level=logging.INFO)
 
 
 class SimpleBenchmark:
@@ -37,7 +39,7 @@ class SimpleBenchmark:
         img_classes = [int(s) for s in os.listdir(path_to_images)]
 
         out_dict = {}
-        for img_cls in tqdm(img_classes, total=len(img_classes)):
+        for img_cls in img_classes:
             images_folder_path = os.path.join(path_to_images, str(img_cls))
             for img_name in os.listdir(images_folder_path):
                 path_to_image = os.path.join(images_folder_path, img_name)
@@ -118,10 +120,10 @@ class SimpleBenchmark:
 
 
 if __name__ == '__main__':
-    path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    path_to_class_names = "/mnt/Disk_G/DL_Data/source/imagenet/imagenet1000_clsidx_to_labels.txt"
+    path_to_images = "/home/ilyado/data/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
+    path_to_class_names = "/home/ilyado/data/imagenet/imagenet1000_clsidx_to_labels.txt"
     model_name = 'mixnet_l'
     in_size = 224
 
-    bench_obj = SimpleBenchmark(model_name=model_name, batch_size=24, workers=11, in_size=in_size)
+    bench_obj = SimpleBenchmark(model_name=model_name, batch_size=24, workers=8, in_size=in_size)
     preds = bench_obj.process(path_to_images=path_to_images, path_to_labels=path_to_class_names)
