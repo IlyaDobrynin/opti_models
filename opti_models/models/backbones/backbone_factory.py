@@ -5,6 +5,7 @@ Simple backbones factory
 from . import (
     resnet18, resnet34, resnet50, resnet101, resnet152,
     mobilenetv2_w1, mobilenetv2_wd2, mobilenetv2_wd4, mobilenetv2_w3d4,
+    mobilenetv3_large_w1,
     efficientnet_b0, efficientnet_b1,
     efficientnet_b0b, efficientnet_b1b, efficientnet_b2b, efficientnet_b3b, efficientnet_b4b,
     efficientnet_b5b, efficientnet_b6b, efficientnet_b7b,
@@ -26,6 +27,7 @@ BACKBONES = {
     "mobilenetv2_wd2": mobilenetv2_wd2,
     "mobilenetv2_wd4": mobilenetv2_wd4,
     "mobilenetv2_w3d4": mobilenetv2_w3d4,
+    "mobilenetv3_large_w1": mobilenetv3_large_w1,
 
     # Efficientnets
     'efficientnet_b0': efficientnet_b0,

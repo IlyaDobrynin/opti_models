@@ -19,6 +19,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mobilenetv2_w3d4', '1082', '8656de5a8d90b29779c35c5ce521267c841fd717', 'v0.0.230', 'MobileNetV2 x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w1', '0887', '13a021bca5b679b76156829743f7182da42e8bb6', 'v0.0.213', 'MobileNetV2 x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
 
+    ('mobilenetv3_large_w1', '0779', '38e392f58bdf99b2832b26341bc9704ac63a3672', 'v0.0.411', 'MobileNetV3 L/224/1.0', '1905.02244', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+
     ('efficientnet_b0', '0752', '0e3861300b8f1d1d0fb1bd15f0e06bba1ad6309b', 'v0.0.364', 'EfficientNet-B0', '1905.11946', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('efficientnet_b1', '0638', 'ac77bcd722dc4f3edfa24b9fb7b8f9cece3d85ab', 'v0.0.376', 'EfficientNet-B1', '1905.11946', 'in1k', 240, 0.882, 200, ''),  # noqa
     ('efficientnet_b0b', '0702', 'ecf61b9b50666a6b444a9d789a5ff1087c65d0d8', 'v0.0.403', 'EfficientNet-B0b', '1905.11946', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa

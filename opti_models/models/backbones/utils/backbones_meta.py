@@ -14,6 +14,7 @@ encoder_dict = {
     'mobilenetv2_wd2': {'skip': MOBILENETV2_LAYERS, 'filters': (8, 12, 16, 48, 1280), 'features': True},
     'mobilenetv2_wd4': {'skip': MOBILENETV2_LAYERS, 'filters': (4, 6, 8, 24, 1280), 'features': True},
     'mobilenetv2_w3d4': {'skip': MOBILENETV2_LAYERS, 'filters': (12, 18, 24, 72, 1280), 'features': True},
+    'mobilenetv3_w1': {'skip': MOBILENETV2_LAYERS, 'filters': (16, 24, 40, 112, 960), 'features': True},
 
     # EFFICIENTNET
     'efficientnet_b0': {'skip': EFFICIENTNET_LAYERS, 'filters': (16, 24, 40, 112, 1280), 'features': True},
