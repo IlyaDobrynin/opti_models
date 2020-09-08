@@ -8,10 +8,7 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 import os
 import torch.nn as nn
 import torch.nn.init as init
-# from ..utils.common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
-# from ido_cv.src.models.backbones.pretrained_models.efficientnet.common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
-# from ido_cv.src.models.backbones.utils.model_store import download_model
-from .utils import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
+from ..utils.custom_blocks import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
 from ..utils.model_store import download_model
 
 
