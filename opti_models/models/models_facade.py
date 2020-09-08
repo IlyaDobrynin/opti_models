@@ -5,6 +5,7 @@
 from typing import Union
 from torch.nn import Module
 from . import ClassificationFactory
+from .backbones.backbone_factory import BACKBONES
 
 # import segmentation_models_pytorch as smp
 
@@ -22,14 +23,15 @@ class ModelFacade:
     """
 
     _models_dict = {
-        'classification': {
-            'basic_classifier': ClassificationFactory,
+        "backbones": BACKBONES,
+        "classification": {
+            "basic_classifier": ClassificationFactory,
         },
-        'segmentation': {
+        "segmentation": {
         },
-        'detection': {
+        "detection": {
         },
-        'ocr': {
+        "ocr": {
         }
     }
 
