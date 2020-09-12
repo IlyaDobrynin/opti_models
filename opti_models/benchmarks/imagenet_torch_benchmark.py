@@ -122,7 +122,7 @@ class SimpleBenchmark:
 if __name__ == '__main__':
     path_to_images = "/home/ilyado/data/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
     path_to_class_names = "/home/ilyado/data/imagenet/imagenet1000_clsidx_to_labels.txt"
-    model_name = 'mixnet_l'
+    model_name = 'mobilenetv3_large_w1'
     in_size = 224
 
     bench_obj = SimpleBenchmark(model_name=model_name, batch_size=24, workers=8, in_size=in_size)
