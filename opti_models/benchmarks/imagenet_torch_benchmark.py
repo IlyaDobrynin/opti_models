@@ -11,9 +11,12 @@ from torchsummary import summary
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
-# from ido_cv import draw_images
 from opti_models.models import models_facade
 from opti_models.benchmarks.datasets import ImagenetDataset
+
+
+from ido_cv.src.models import models_facade as ido_models_facade
+from ido_cv import draw_images
 
 logging.basicConfig(level=logging.INFO)
 
@@ -56,6 +59,7 @@ class SimpleBenchmark:
         return out_df
 
     def _load_model(self, show: bool = False):
+        # models_facade_obj = ido_models_facade.ModelFacade(task="backbones")
         models_facade_obj = models_facade.ModelFacade(task="backbones")
         model = models_facade_obj.get_model_class(model_definition=self.model_name)(requires_grad=False, pretrained='imagenet')
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -120,10 +124,16 @@ class SimpleBenchmark:
 
 
 if __name__ == '__main__':
-    path_to_images = "/home/ilyado/data/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    path_to_class_names = "/home/ilyado/data/imagenet/imagenet1000_clsidx_to_labels.txt"
-    model_name = 'mobilenetv3_large_w1'
-    in_size = 224
+    # path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
+    path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2_topimages_png"
+    path_to_class_names = "/mnt/Disk_G/DL_Data/source/imagenet/imagenet1000_clsidx_to_labels.txt"
+    # model_name = 'genet_small'
+    model_name = 'genet_normal'
+    # model_name = 'genet_large'
+    # model_name = 'efficientnet_b0b'
+    # model_name = 'mobilenetv2_w1'
+    # model_name = 'mobilenetv3_large_w1'
+    in_size = 192
 
-    bench_obj = SimpleBenchmark(model_name=model_name, batch_size=24, workers=8, in_size=in_size)
+    bench_obj = SimpleBenchmark(model_name=model_name, batch_size=128, workers=11, in_size=in_size)
     preds = bench_obj.process(path_to_images=path_to_images, path_to_labels=path_to_class_names)

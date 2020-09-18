@@ -9,7 +9,7 @@ RESNET_LAYERS = (
     ['layer4']
 )
 
-MOBILENETV2_LAYERS = (
+MOBILENET_LAYERS = (
     ['init_block', 'stage1'],
     ['stage2'],
     ['stage3'],
@@ -31,4 +31,12 @@ MIXNET_LAYERS = (
     ['stage2'],
     ['stage3'],
     ['stage4', 'final_block']
+)
+
+GENET_LAYERS = (
+    ['0', '1', "2"],
+    ['3'],
+    ['4'],
+    ['5'],
+    ['6', '7', '8', '9', '10'],
 )

@@ -97,7 +97,7 @@ class ClassificationFactory(nn.Module):
         encoder_list = nn.ModuleList([])
         if self.is_featured:
             for (mk, mv) in self.encoder.named_children():
-                if mk in ['features', 'encoder_layers']:
+                if mk in ['features', 'encoder_layers', 'module_list']:
                     if first_enc_layer is None:
                         for i in range(self.depth):
                             encoder_layer = nn.ModuleList([])

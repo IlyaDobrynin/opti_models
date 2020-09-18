@@ -9,8 +9,11 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from ..utils.custom_blocks import round_channels, get_activation_layer, conv1x1_block, conv3x3_block, dwconv3x3_block, SEBlock
-from ..utils.model_store import download_model
+# from ..utils.custom_blocks import round_channels, get_activation_layer, conv1x1_block, conv3x3_block, dwconv3x3_block, SEBlock
+# from ..utils.model_store import download_model
+
+from opti_models.models.backbones.utils.custom_blocks import round_channels, get_activation_layer, conv1x1_block, conv3x3_block, dwconv3x3_block, SEBlock
+from opti_models.models.backbones.utils.model_store import download_model
 
 
 class MixConv(nn.Module):
@@ -561,3 +564,67 @@ def mixnet_l(requires_grad=True, **kwargs):
     for params in net.parameters():
         params.requires_grad = requires_grad
     return net
+
+
+class NetEncoder(nn.Module):
+    def __init__(self, model, layers):
+        super(NetEncoder, self).__init__()
+        self.model = model
+        self.layers = layers
+
+        self.encoder_list = self._get_encoder()
+        print(len(self.encoder_list))
+
+    def _get_encoder(self):
+        encoder_list = nn.ModuleList([])
+        for (mk, mv) in self.model.named_children():
+            if mk == 'features':
+                for i in range(5):
+                    encoder_layer = nn.ModuleList([])
+                    for layer in self.layers[i]:
+                        print(layer)
+                        encoder_layer.append(dict(mv.named_children())[layer])
+                    encoder_list.append(nn.Sequential(*encoder_layer))
+            else:
+                continue
+        del self.model
+        return encoder_list
+
+    def forward(self, x):
+        encoder_list = []
+        for encoder_layer in self.encoder_list:
+            x = encoder_layer(x)
+            # print(x.shape)
+            encoder_list.append(x)
+        for i in encoder_list:
+            print(i.shape)
+        return x  # , encoder_list
+
+
+
+if __name__ == '__main__':
+
+    # _test()
+
+    input_size = (3, 256, 256)
+    model = mixnet_l(pretrained='imagenet')
+
+    for i, (mk, mv) in enumerate(model.named_children()):
+        print(i, mk)
+        if mk == 'features':
+            for j, (fk, fv) in enumerate(mv.named_children()):
+                print(i, j, fk)
+    net_layers = (
+        ['init_block'],
+        ['stage1'],
+        ['stage2'],
+        ['stage3'],
+        ['stage4', 'final_block']
+    )
+    encoder = NetEncoder(model, layers=net_layers)
+    import torch
+    from torchsummary import summary
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    encoder = encoder.to(device)
+    summary(encoder, input_size=input_size)
