@@ -1,14 +1,10 @@
 import typing as t
 import pandas as pd
-from PIL import Image
 import cv2
-import numpy as np
 import torch
 from torch.utils.data import Dataset
-import torchvision.transforms as transforms
 from albumentations import Compose, Resize, Normalize
 from albumentations.pytorch.transforms import ToTensorV2
-from ido_cv import draw_images
 
 
 class ImagenetDataset(Dataset):

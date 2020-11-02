@@ -1,23 +1,17 @@
 import os
-import ast
 import typing as t
 import numpy as np
 import pandas as pd
 from time import time
 from tqdm import tqdm
-import cv2
 import logging
 from torchsummary import summary
 import torch
+from argparse import ArgumentParser
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
 from opti_models.models import models_facade
 from opti_models.benchmarks.datasets import ImagenetDataset
-
-
-from ido_cv.src.models import models_facade as ido_models_facade
-from ido_cv import draw_images
-
 logging.basicConfig(level=logging.INFO)
 
 
@@ -34,11 +28,7 @@ class SimpleBenchmark:
         self.workers = workers
         self.in_size = in_size
 
-    def _prepare_data(
-            self, path_to_images: str, path_to_labels: str, show: bool = False):
-        with open(path_to_labels) as f:
-            doc = f.read()
-        doc = ast.literal_eval(doc)
+    def _prepare_data(self, path_to_images: str):
         img_classes = [int(s) for s in os.listdir(path_to_images)]
 
         out_dict = {}
@@ -47,10 +37,6 @@ class SimpleBenchmark:
             for img_name in os.listdir(images_folder_path):
                 path_to_image = os.path.join(images_folder_path, img_name)
                 out_dict[path_to_image] = img_cls
-                if show:
-                    image = cv2.cvtColor(cv2.imread(path_to_image), cv2.COLOR_BGR2RGB)
-                    title_dict = {'text': doc[img_cls], 'size': 14, 'weight': 'bold', 'color': 'black'}
-                    draw_images([image], title=title_dict)
 
         out_df = pd.DataFrame()
         out_df['names'] = list(out_dict.keys())
@@ -59,9 +45,10 @@ class SimpleBenchmark:
         return out_df
 
     def _load_model(self, show: bool = False):
-        # models_facade_obj = ido_models_facade.ModelFacade(task="backbones")
         models_facade_obj = models_facade.ModelFacade(task="backbones")
-        model = models_facade_obj.get_model_class(model_definition=self.model_name)(requires_grad=False, pretrained='imagenet')
+        model = models_facade_obj.get_model_class(
+            model_definition=self.model_name
+        )(requires_grad=False, pretrained='imagenet')
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.eval().to(device)
         if show:
@@ -89,18 +76,21 @@ class SimpleBenchmark:
                 successes += 1
         return float(successes) / len(truths)
 
-    def _compute_metrics(self, trues_df: pd.DataFrame, preds: t.Dict):
+    def _compute_metrics(
+            self,
+            trues_df: pd.DataFrame,
+            preds: t.Dict,
+            top_n_ranks: t.Tuple = (1, 5)
+    ):
         true_labels = []
         pred_labels = []
         for name in preds.keys():
             true_labels.append(trues_df[trues_df['names'] == name]['labels'].values.tolist()[0])
             pred_labels.append(preds[name])
-
-        top_1_acc = self.top_n_accuracy(preds=pred_labels, truths=true_labels, n=1)
-        top_5_acc = self.top_n_accuracy(preds=pred_labels, truths=true_labels, n=5)
-        logging.info(f"\tBENCHMARK DONE FOR {self.model_name}")
-        logging.info(f"\tTOP 1 ACCURACY: {top_1_acc * 100:.2f}\tTOP 1 ERROR: {(1 - top_1_acc) * 100:.2f}")
-        logging.info(f"\tTOP 5 ACCURACY: {top_5_acc * 100:.2f}\tTOP 5 ERROR: {(1 - top_5_acc) * 100:.2f}")
+        for rank in top_n_ranks:
+            top_rank_acc = self.top_n_accuracy(preds=pred_labels, truths=true_labels, n=rank)
+            logging.info(f"\tTOP {rank} ACCURACY: {top_rank_acc * 100:.2f}"
+                         f"\tTOP 1 ERROR: {(1 - top_rank_acc) * 100:.2f}")
 
     def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module):
         preds_dict = {}
@@ -115,25 +105,42 @@ class SimpleBenchmark:
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
         return preds_dict
 
-    def process(self, path_to_images: str, path_to_labels: str):
-        labels_df = self._prepare_data(path_to_images=path_to_images, path_to_labels=path_to_labels)
+    def process(self, path_to_images: str):
+        logging.info(f"\tBENCHMARK FOR {self.model_name}")
+        labels_df = self._prepare_data(path_to_images=path_to_images)
         model = self._load_model()
         dataloader = self._make_dataloader(data_df=labels_df)
         preds_dict = self._inference_loop(dataloader=dataloader, model=model)
         self._compute_metrics(trues_df=labels_df, preds=preds_dict)
 
 
-if __name__ == '__main__':
-    # path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2_topimages_png"
-    path_to_class_names = "/mnt/Disk_G/DL_Data/source/imagenet/imagenet1000_clsidx_to_labels.txt"
-    # model_name = 'genet_small'
-    model_name = 'genet_normal'
-    # model_name = 'genet_large'
-    # model_name = 'efficientnet_b0b'
-    # model_name = 'mobilenetv2_w1'
-    # model_name = 'mobilenetv3_large_w1'
-    in_size = 192
+def parse_args():
+    # Default args
+    path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
+    model_name = "genet_small"
+    in_size = 224
+    batch_size = 128
+    workers = 11
 
-    bench_obj = SimpleBenchmark(model_name=model_name, batch_size=128, workers=11, in_size=in_size)
-    preds = bench_obj.process(path_to_images=path_to_images, path_to_labels=path_to_class_names)
+    parser = ArgumentParser()
+    parser.add_argument('--path_to_images', default=path_to_images, type=str)
+    parser.add_argument('--model_name', default=model_name, type=str)
+    parser.add_argument('--in_size', default=in_size, type=int)
+    parser.add_argument('--batch_size', default=batch_size, type=int)
+    parser.add_argument('--workers', default=workers, type=int)
+    return parser.parse_args()
+
+
+def main(args):
+    bench_obj = SimpleBenchmark(
+        model_name=args.model_name,
+        batch_size=args.batch_size,
+        workers=args.workers,
+        in_size=args.in_size
+    )
+    bench_obj.process(path_to_images=args.path_to_images)
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)
