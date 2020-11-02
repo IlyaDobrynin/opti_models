@@ -90,7 +90,7 @@ class SimpleBenchmark:
         for rank in top_n_ranks:
             top_rank_acc = self.top_n_accuracy(preds=pred_labels, truths=true_labels, n=rank)
             logging.info(f"\tTOP {rank} ACCURACY: {top_rank_acc * 100:.2f}"
-                         f"\tTOP 1 ERROR: {(1 - top_rank_acc) * 100:.2f}")
+                         f"\tTOP {rank} ERROR: {(1 - top_rank_acc) * 100:.2f}")
 
     def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module):
         preds_dict = {}
