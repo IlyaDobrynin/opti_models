@@ -267,8 +267,4 @@ def download_model(
         Whether to silently ignore parameters from the file that are not present in this Module.
     """
     file_path = get_model_file(model_name=model_name, local_model_store_dir_path=local_model_store_dir_path)
-    load_model(
-        net=net,
-        file_path=file_path,
-        ignore_extra=ignore_extra
-    )
+    load_model(net=net, file_path=file_path, ignore_extra=ignore_extra)

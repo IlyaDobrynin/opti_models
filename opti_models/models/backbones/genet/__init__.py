@@ -1273,73 +1273,84 @@ class PlainNet(nn.Module):
         return output
 
 
-def genet_large(pretrained=False, num_classes=1000, requires_grad: bool = True, root=os.path.join("~", ".torch", "models")):
-    this_file_dir = os.path.dirname(__file__)
-    plainnet_txt = os.path.join(this_file_dir, 'GENet_large.txt')
+def get_genet(
+        model_type: str,
+        pretrained: bool = False,
+        num_classes: int = 1000,
+        requires_grad: bool = True,
+        root: str = os.path.join("~", ".torch", "models")
+):
+    assert model_type in ["small", "normal", "large"], f"Wrong model_type parameter: {model_type}." \
+                                                       f"Should be 'small', 'normal' or 'large'"
+
+    from .download_utils import download, model_urls
+
+    root = os.path.expanduser(root)
+    plainnet_txt = os.path.join(root, f'genet_{model_type}/GENet_{model_type}.txt')
     if not os.path.isfile(plainnet_txt):
-        raise RuntimeError(
-            'Cannnot find {}! Please download the GENet_*.pth and GENet_*.txt files to {}'.format(plainnet_txt, root))
+        model_text_url = model_urls[model_type]["text"]
+        download(url=model_text_url, path=plainnet_txt)
     with open(plainnet_txt, 'r') as fid:
         plainnet_struct = fid.readlines()[0].strip()
 
     model = PlainNet(num_classes=num_classes, plainnet_struct=plainnet_struct)
-    root = os.path.expanduser(root)
     if pretrained:
-        pth_file = os.path.join(root, 'GENet_large.pth')
+        pth_file = os.path.join(root, f'genet_{model_type}/GENet_{model_type}.pth')
         if not os.path.isfile(pth_file):
-            raise RuntimeError('Cannnot find {}! Please download the GENet_*.pth and GENet_*.txt files to {}'.format(pth_file, root))
-
+            model_weights_url = model_urls[model_type]["weights"]
+            size = model_urls[model_type]["size"]
+            download(url=model_weights_url, path=pth_file, size=size)
         checkpoint = torch.load(pth_file, map_location='cpu')
         model.load_state_dict(checkpoint['state_dict'], strict=True)
-
     for params in model.parameters():
         params.requires_grad = requires_grad
 
     return model
 
 
-def genet_normal(pretrained=False, num_classes=1000, requires_grad: bool = True, root=os.path.join("~", ".torch", "models")):
-    this_file_dir = os.path.dirname(__file__)
-    plainnet_txt = os.path.join(this_file_dir, 'GENet_normal.txt')
-    if not os.path.isfile(plainnet_txt):
-        raise RuntimeError(
-            'Cannnot find {}! Please download the GENet_*.pth and GENet_*.txt files to {}'.format(plainnet_txt, root))
-    with open(plainnet_txt, 'r') as fid:
-        plainnet_struct = fid.readlines()[0].strip()
-
-    model = PlainNet(num_classes=num_classes, plainnet_struct=plainnet_struct)
-    root = os.path.expanduser(root)
-    if pretrained:
-        pth_file = os.path.join(root, 'GENet_normal.pth')
-        if not os.path.isfile(pth_file):
-            raise RuntimeError('Cannnot find {}! Please download the GENet_*.pth and GENet_*.txt files to {}'.format(pth_file, root))
-
-        checkpoint = torch.load(pth_file, map_location='cpu')
-        model.load_state_dict(checkpoint['state_dict'], strict=True)
-    for params in model.parameters():
-        params.requires_grad = requires_grad
+def genet_large(
+        pretrained: bool = False,
+        num_classes: int = 1000,
+        requires_grad: bool = True,
+        root: str = os.path.join("~", ".torch", "models")
+):
+    model = get_genet(
+        model_type='large',
+        pretrained=pretrained,
+        num_classes=num_classes,
+        requires_grad=requires_grad,
+        root=root
+    )
     return model
 
 
-def genet_small(pretrained=False, num_classes=1000, requires_grad: bool = True, root=os.path.join("~", ".torch", "models")):
-    this_file_dir = os.path.dirname(__file__)
-    plainnet_txt = os.path.join(this_file_dir, 'GENet_small.txt')
-    if not os.path.isfile(plainnet_txt):
-        raise RuntimeError(
-            'Cannnot find {}! Please download the GENet_*.pth and GENet_*.txt files to {}'.format(plainnet_txt, root))
-    with open(plainnet_txt, 'r') as fid:
-        plainnet_struct = fid.readlines()[0].strip()
+def genet_normal(
+        pretrained: bool = False,
+        num_classes: int = 1000,
+        requires_grad: bool = True,
+        root: str = os.path.join("~", ".torch", "models")
+):
+    model = get_genet(
+        model_type='normal',
+        pretrained=pretrained,
+        num_classes=num_classes,
+        requires_grad=requires_grad,
+        root=root
+    )
+    return model
 
-    model = PlainNet(num_classes=num_classes, plainnet_struct=plainnet_struct)
 
-    root = os.path.expanduser(root)
-    if pretrained:
-        pth_file = os.path.join(root, 'GENet_small.pth')
-        if not os.path.isfile(pth_file):
-            raise RuntimeError('Cannnot find {}! Please download the GENet_*.pth and GENet_*.txt files to {}'.format(pth_file, root))
-
-        checkpoint = torch.load(pth_file, map_location='cpu')
-        model.load_state_dict(checkpoint['state_dict'], strict=True)
-    for params in model.parameters():
-        params.requires_grad = requires_grad
+def genet_small(
+        pretrained: bool = False,
+        num_classes: int = 1000,
+        requires_grad: bool = True,
+        root: str = os.path.join("~", ".torch", "models")
+):
+    model = get_genet(
+        model_type='small',
+        pretrained=pretrained,
+        num_classes=num_classes,
+        requires_grad=requires_grad,
+        root=root
+    )
     return model

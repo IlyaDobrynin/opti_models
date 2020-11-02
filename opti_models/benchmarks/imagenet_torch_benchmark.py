@@ -106,10 +106,10 @@ class SimpleBenchmark:
         return preds_dict
 
     def process(self, path_to_images: str):
-        logging.info(f"\tBENCHMARK FOR {self.model_name}")
         labels_df = self._prepare_data(path_to_images=path_to_images)
         model = self._load_model()
         dataloader = self._make_dataloader(data_df=labels_df)
+        logging.info(f"\tBENCHMARK FOR {self.model_name}")
         preds_dict = self._inference_loop(dataloader=dataloader, model=model)
         self._compute_metrics(trues_df=labels_df, preds=preds_dict)
 
