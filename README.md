@@ -17,4 +17,4 @@ pip install .
     - `in_size` - height and width of the input image, default imagenet value = 224
     - `batch_size` - anount of the images in every batch
     - `workers` - number of workers
-3. Run: `bash scripts/benchmark.sh`
+3. Run: `bash scripts/default_imagenet_benchmark.sh`
