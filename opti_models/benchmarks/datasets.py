@@ -8,7 +8,8 @@ from albumentations.pytorch.transforms import ToTensorV2
 
 
 class ImagenetDataset(Dataset):
-    def __init__(self, data_df: pd.DataFrame, in_size: int = 224):
+    def __init__(self, data_df: pd.DataFrame, in_size: t.Tuple = (224, 224), mode: str = 'torch'):
+        self.mode = mode
         self.data_df = data_df
         if "names" in data_df.columns:
             self.file_names = data_df['names']
@@ -19,8 +20,8 @@ class ImagenetDataset(Dataset):
 
         self.albu_augmentations = Compose([
             Resize(
-                height=in_size,
-                width=in_size,
+                height=in_size[0],
+                width=in_size[1],
                 interpolation=cv2.INTER_AREA
             ),
             Normalize(
@@ -29,7 +30,6 @@ class ImagenetDataset(Dataset):
             ),
             ToTensorV2(),
         ], p=1)
-
 
     def __len__(self):
         return len(self.file_names)

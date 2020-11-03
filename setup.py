@@ -23,24 +23,19 @@ setuptools.setup(
         "Operating System :: Ubuntu",
     ],
     install_requires=[
-        'tb-nightly==2.1.0a20190923',
-        'future>=0.17.1',
         'opencv-python==4.1.0.25',
         'torchvision==0.8.1',
         'torchsummary==1.5.1',
         'torch==1.7.0',
-        'networkx>=2.3',
         'numpy>=1.15.4',
         'pandas>=0.23.4',
-        'matplotlib>=3.0.2',
         'requests>=2.21.0',
         'albumentations>=0.4.0',
         'scikit_image>=0.14.2',
-        'setuptools==41.0.0',
         'tqdm>=4.28.1',
-        'scikit_learn>=0.21.3',
-        'pyyaml==3.13',
-        'onnx>=1.4.1',
-        'test-generator==0.1.2'
+        'onnx>=1.7.0',
+        'onnxruntime>=1.5.2',
+        'pycuda==2020.1',
+        'onnx-simplifier>=0.2.18'
     ]
 )

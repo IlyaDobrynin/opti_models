@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 from torch.nn import functional as F
 from opti_models.models import models_facade
 from opti_models.benchmarks.datasets import ImagenetDataset
+from opti_models.utils.benchmarks_utils import compute_metrics, prepare_data
 logging.basicConfig(level=logging.INFO)
 
 
@@ -21,28 +22,12 @@ class SimpleBenchmark:
             model_name: str,
             batch_size: int,
             workers: int,
-            in_size: int = 224
+            in_size: t.Tuple = (224, 224)
     ):
         self.model_name = model_name
         self.batch_size = batch_size
         self.workers = workers
         self.in_size = in_size
-
-    def _prepare_data(self, path_to_images: str):
-        img_classes = [int(s) for s in os.listdir(path_to_images)]
-
-        out_dict = {}
-        for img_cls in img_classes:
-            images_folder_path = os.path.join(path_to_images, str(img_cls))
-            for img_name in os.listdir(images_folder_path):
-                path_to_image = os.path.join(images_folder_path, img_name)
-                out_dict[path_to_image] = img_cls
-
-        out_df = pd.DataFrame()
-        out_df['names'] = list(out_dict.keys())
-        out_df['labels'] = list(out_dict.values())
-
-        return out_df
 
     def _load_model(self, show: bool = False):
         models_facade_obj = models_facade.ModelFacade(task="backbones")
@@ -52,7 +37,7 @@ class SimpleBenchmark:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.eval().to(device)
         if show:
-            summary(model, input_size=(3, 224, 224))
+            summary(model, input_size=[3] + self.in_size)
         return model
 
     def _make_dataloader(self, data_df: pd.DataFrame):
@@ -67,65 +52,48 @@ class SimpleBenchmark:
         )
         return dataloader
 
-    @staticmethod
-    def top_n_accuracy(preds: t.List, truths: t.List, n: int):
-        best_n = np.argsort(-np.asarray(preds), axis=1)[:, :n]
-        successes = 0
-        for i, truth in enumerate(truths):
-            if truth in best_n[i, :]:
-                successes += 1
-        return float(successes) / len(truths)
-
-    def _compute_metrics(
-            self,
-            trues_df: pd.DataFrame,
-            preds: t.Dict,
-            top_n_ranks: t.Tuple = (1, 5)
-    ):
-        true_labels = []
-        pred_labels = []
-        for name in preds.keys():
-            true_labels.append(trues_df[trues_df['names'] == name]['labels'].values.tolist()[0])
-            pred_labels.append(preds[name])
-        for rank in top_n_ranks:
-            top_rank_acc = self.top_n_accuracy(preds=pred_labels, truths=true_labels, n=rank)
-            logging.info(f"\tTOP {rank} ACCURACY: {top_rank_acc * 100:.2f}"
-                         f"\tTOP {rank} ERROR: {(1 - top_rank_acc) * 100:.2f}")
-
     def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module):
         preds_dict = {}
         avg_batch_time = []
         for batch in tqdm(dataloader, total=len(dataloader)):
             inputs = batch[0].cuda()
             names = batch[2]
+
             batch_time = time()
-            preds = F.softmax(model(inputs), dim=-1).data.cpu().numpy()
+            preds = model(inputs)
             avg_batch_time.append(time() - batch_time)
+
+            preds = F.softmax(preds, dim=-1).data.cpu().numpy()
             preds_dict.update({name: label for name, label in zip(names, preds)})
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
         return preds_dict
 
-    def process(self, path_to_images: str):
-        labels_df = self._prepare_data(path_to_images=path_to_images)
+    def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
+        labels_df = prepare_data(path_to_images=path_to_images)
         model = self._load_model()
         dataloader = self._make_dataloader(data_df=labels_df)
+
         logging.info(f"\tBENCHMARK FOR {self.model_name}")
         preds_dict = self._inference_loop(dataloader=dataloader, model=model)
-        self._compute_metrics(trues_df=labels_df, preds=preds_dict)
+
+        rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
+        for rank, rank_metric in zip(ranks, rank_metrics):
+            logging.info(f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}"
+                         f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}")
 
 
 def parse_args():
     # Default args
     path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    model_name = "genet_small"
-    in_size = 224
+    model_name = "куы"
+    in_size = (224, 224)
     batch_size = 128
     workers = 11
 
     parser = ArgumentParser()
     parser.add_argument('--path_to_images', default=path_to_images, type=str)
     parser.add_argument('--model_name', default=model_name, type=str)
-    parser.add_argument('--in_size', default=in_size, type=int)
+    parser.add_argument('--in_size', default=in_size, nargs='+', type=int)
     parser.add_argument('--batch_size', default=batch_size, type=int)
     parser.add_argument('--workers', default=workers, type=int)
     return parser.parse_args()
