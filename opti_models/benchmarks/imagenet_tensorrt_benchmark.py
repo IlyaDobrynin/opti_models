@@ -81,19 +81,19 @@ class TensorRTBenchmark:
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
         labels_df = prepare_data(path_to_images=path_to_images)
 
-        logging.info(f"\tBENCHMARK FOR {self.model_name}")
+        logging.info(f"\tBENCHMARK FOR {self.model_name}: START")
         preds_dict = self._inference_loop(labels_df=labels_df)
-
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
         for rank, rank_metric in zip(ranks, rank_metrics):
             logging.info(f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}"
                          f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}")
+        logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
 
 
 def parse_args():
     # Default args
     path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    trt_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/data/trt_export/genet_small_bs-1_res-(224, 224).engine"
+    trt_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/data/trt_export/mobilenetv3_bs-1_res-224x224.engine"
     in_size = (224, 224)
 
     parser = ArgumentParser()
