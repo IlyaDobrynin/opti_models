@@ -85,10 +85,10 @@ class SimpleBenchmark:
 def parse_args():
     # Default args
     path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    model_name = "куы"
+    model_name = "genet_small"
     in_size = (224, 224)
-    batch_size = 128
-    workers = 11
+    batch_size = 1
+    workers = 1
 
     parser = ArgumentParser()
     parser.add_argument('--path_to_images', default=path_to_images, type=str)
@@ -128,14 +128,12 @@ def bench_all():
         'genet_normal',
         'genet_large'
     ]
-    trt_models_path = "../../data/trt_export"
 
-    for name in model_names:
-        trt_model_path = os.path.join(trt_models_path, name)
-        trt_model_name = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")][0]
-        trt_path = os.path.join(trt_model_path, trt_model_name)
+    for model_name in model_names:
         args = parse_args()
-        args.trt_path = trt_path
+        args.model_name = model_name
+        if model_name == "genet_large":
+            args.in_size = (256, 256)
         main(args=args)
         logging.info(f"-" * 100)
 
@@ -143,3 +141,5 @@ def bench_all():
 if __name__ == '__main__':
     args = parse_args()
     main(args)
+
+    # bench_all()
