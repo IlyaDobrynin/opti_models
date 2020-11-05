@@ -76,11 +76,9 @@ def make_trt_convertation(
         logging.info("\tConvert to TensorRT: START")
 
     model_name = onnx_model_path.split("/")[-2]
-
     export_dir = os.path.join(export_dir, model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-
     out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[0]}.engine"
     export_path = os.path.join(export_dir, out_model_name)
 
@@ -137,7 +135,6 @@ def parse_args():
     onnx_path = ""
     export_dir = "../../data/trt_export"
     in_size = (224, 224)
-
     parser = argparse.ArgumentParser(description='TRT params')
     parser.add_argument('--onnx_path', default=onnx_path, type=str)
     parser.add_argument('--export_dir', default=export_dir, type=str)

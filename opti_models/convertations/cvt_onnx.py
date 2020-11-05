@@ -132,7 +132,6 @@ def parse_args():
     model_name = "mobilenetv3_large_w1"
     export_dir = f"../../data/onnx_export"
     in_size = (224, 224)
-
     parser = argparse.ArgumentParser(description='TRT params')
     parser.add_argument('--model_name', default=model_name, type=str)
     parser.add_argument('--export_dir', default=export_dir)
@@ -174,7 +173,3 @@ def cvt_all():
 if __name__ == '__main__':
     args = parse_args()
     main(args=args)
-
-    # cvt_all()
-
-
