@@ -75,8 +75,12 @@ def make_trt_convertation(
     if info:
         logging.info("\tConvert to TensorRT: START")
 
-    os.makedirs(export_dir, exist_ok=True)
-    model_name = onnx_model_path.split("/")[-1].split("_")[0]
+    model_name = onnx_model_path.split("/")[-2]
+
+    export_dir = os.path.join(export_dir, model_name)
+    if not os.path.exists(export_dir):
+        os.makedirs(export_dir, exist_ok=True)
+
     out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[0]}.engine"
     export_path = os.path.join(export_dir, out_model_name)
 
@@ -130,20 +134,56 @@ def main(args):
 
 
 def parse_args():
-    onnx_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/data/onnx_export/mobilenetv3_large_w1_bs-1_res-224_simplified.onnx"
-    export_dir = "/mnt/Disk_F/Programming/pet_projects/opti_models/data/trt_export"
+    onnx_path = ""
+    export_dir = "../../data/trt_export"
+    in_size = (224, 224)
 
     parser = argparse.ArgumentParser(description='TRT params')
     parser.add_argument('--onnx_path', default=onnx_path, type=str)
     parser.add_argument('--export_dir', default=export_dir, type=str)
     parser.add_argument('--batch_size', default=1, type=int)
-    parser.add_argument('--in_size', nargs="+", default=(224, 224), type=int)
+    parser.add_argument('--in_size', nargs="+", default=in_size, type=int)
     parser.add_argument('--fp_type', default="32", type=str)
     parser.add_argument('--info', type=bool, default=True)
 
     return parser.parse_args()
 
 
+def cvt_all():
+    model_names = [
+        "resnet50",
+        "resnet34",
+        "resnet18",
+        "mobilenetv2_w1",
+        "mobilenetv2_wd2",
+        "mobilenetv2_wd4",
+        "mobilenetv2_w3d4",
+        "mobilenetv3_large_w1",
+        "mixnet_s",
+        "mixnet_m",
+        "mixnet_l",
+        'efficientnet_b0',
+        'efficientnet_b1',
+        'genet_small',
+        'genet_normal',
+        'genet_large'
+    ]
+
+    onnx_models = "../../data/onnx_export"
+    for name in model_names:
+        logging.info(f"{name.upper()} CONVERT")
+        onnx_model_folder = os.path.join(onnx_models, name)
+        onnx_model_name = [f for f in os.listdir(onnx_model_folder) if f.endswith("_simplified.onnx")][0]
+        onnx_model_path = os.path.join(onnx_model_folder, onnx_model_name)
+
+        args = parse_args()
+        args.onnx_path = onnx_model_path
+        main(args=args)
+        logging.info(f"-" * 100)
+
+
 if __name__ == '__main__':
     args = parse_args()
     main(args=args)
+
+    # cvt_all()

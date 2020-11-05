@@ -1,3 +1,4 @@
+import os
 import typing as t
 import numpy as np
 import pandas as pd
@@ -28,7 +29,7 @@ class TensorRTBenchmark:
             trt_runtime=self.trt_runtime,
             engine_path=trt_path
         )
-        self.model_name = trt_path.split("/")[-1].split("_")[0]
+        self.model_name = trt_path.split("/")[-2]
         self.inputs, self.outputs, self.bindings, self.stream = allocate_buffers(self.trt_engine)
         self.context = self.trt_engine.create_execution_context()
         input_volume = trt.volume((3, self.model_width, self.model_height))
@@ -71,8 +72,6 @@ class TensorRTBenchmark:
 
             [cuda.memcpy_dtoh_async(out.host, out.device, self.stream) for out in self.outputs]
             self.stream.synchronize()
-
-
             pred = np.asarray([out.host for out in self.outputs])
             preds_dict.update({name: label for name, label in zip([name], pred)})
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
@@ -93,7 +92,7 @@ class TensorRTBenchmark:
 def parse_args():
     # Default args
     path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    trt_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/data/trt_export/mobilenetv3_bs-1_res-224x224.engine"
+    trt_path = "../../data/trt_export/resnet18/resnet18_bs-1_res-224x224.engine"
     in_size = (224, 224)
 
     parser = ArgumentParser()
@@ -111,6 +110,39 @@ def main(args):
     bench_obj.process(path_to_images=args.path_to_images)
 
 
+def bench_all():
+    model_names = [
+        "resnet50",
+        "resnet34",
+        "resnet18",
+        "mobilenetv2_w1",
+        "mobilenetv2_wd2",
+        "mobilenetv2_wd4",
+        "mobilenetv2_w3d4",
+        "mobilenetv3_large_w1",
+        "mixnet_s",
+        "mixnet_m",
+        "mixnet_l",
+        'efficientnet_b0',
+        'efficientnet_b1',
+        'genet_small',
+        'genet_normal',
+        'genet_large'
+    ]
+    trt_models_path = "../../data/trt_export"
+
+    for name in model_names:
+        trt_model_path = os.path.join(trt_models_path, name)
+        trt_model_name = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")][0]
+        trt_path = os.path.join(trt_model_path, trt_model_name)
+        args = parse_args()
+        args.trt_path = trt_path
+        main(args=args)
+        logging.info(f"-" * 100)
+
+
 if __name__ == '__main__':
     args = parse_args()
     main(args)
+
+    # bench_all()

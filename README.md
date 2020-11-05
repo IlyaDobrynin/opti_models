@@ -11,6 +11,7 @@ source venv/bin/activate
 ```
 git clone git@github.com:IlyaDobrynin/opti_models.git && cd opti_models
 git checkout dev
+pip install --upgrade pip
 pip install .
 ```
 2. Install tensorrt

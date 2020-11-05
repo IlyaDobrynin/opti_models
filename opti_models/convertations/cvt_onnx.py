@@ -28,6 +28,7 @@ def get_model(model_name: str, input_shape: t.Tuple, show: bool = False) -> torc
 
 
 def get_parameters(export_dir: str, model_name: str, batch_size: int, in_size: t.Tuple) -> t.Tuple:
+    export_dir = os.path.join(export_dir, model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
     out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[1]}"
@@ -129,20 +130,51 @@ def main(args):
 
 def parse_args():
     model_name = "mobilenetv3_large_w1"
-    export_dir = "/mnt/Disk_F/Programming/pet_projects/opti_models/data/onnx_export"
+    export_dir = f"../../data/onnx_export"
+    in_size = (224, 224)
 
     parser = argparse.ArgumentParser(description='TRT params')
     parser.add_argument('--model_name', default=model_name, type=str)
     parser.add_argument('--export_dir', default=export_dir)
     parser.add_argument('--batch_size', default=1, type=int)
-    parser.add_argument('--in_size', nargs="+", default=(224, 224), type=int)
+    parser.add_argument('--in_size', nargs="+", default=in_size, type=int)
     parser.add_argument('--info', type=bool, default=True)
 
     return parser.parse_args()
 
 
+def cvt_all():
+    model_names = [
+        "resnet50",
+        "resnet34",
+        "resnet18",
+        "mobilenetv2_w1",
+        "mobilenetv2_wd2",
+        "mobilenetv2_wd4",
+        "mobilenetv2_w3d4",
+        "mobilenetv3_large_w1",
+        "mixnet_s",
+        "mixnet_m",
+        "mixnet_l",
+        'efficientnet_b0',
+        'efficientnet_b1',
+        'genet_small',
+        'genet_normal',
+        'genet_large'
+    ]
+
+    for name in model_names:
+        logging.info(f"{name.upper()} CONVERT")
+        args = parse_args()
+        args.model_name = name
+        main(args=args)
+        logging.info(f"-" * 100)
+
+
 if __name__ == '__main__':
     args = parse_args()
     main(args=args)
+
+    # cvt_all()
 
 

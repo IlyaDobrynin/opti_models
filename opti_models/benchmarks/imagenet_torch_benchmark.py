@@ -109,6 +109,37 @@ def main(args):
     bench_obj.process(path_to_images=args.path_to_images)
 
 
+def bench_all():
+    model_names = [
+        "resnet50",
+        "resnet34",
+        "resnet18",
+        "mobilenetv2_w1",
+        "mobilenetv2_wd2",
+        "mobilenetv2_wd4",
+        "mobilenetv2_w3d4",
+        "mobilenetv3_large_w1",
+        "mixnet_s",
+        "mixnet_m",
+        "mixnet_l",
+        'efficientnet_b0',
+        'efficientnet_b1',
+        'genet_small',
+        'genet_normal',
+        'genet_large'
+    ]
+    trt_models_path = "../../data/trt_export"
+
+    for name in model_names:
+        trt_model_path = os.path.join(trt_models_path, name)
+        trt_model_name = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")][0]
+        trt_path = os.path.join(trt_model_path, trt_model_name)
+        args = parse_args()
+        args.trt_path = trt_path
+        main(args=args)
+        logging.info(f"-" * 100)
+
+
 if __name__ == '__main__':
     args = parse_args()
     main(args)
