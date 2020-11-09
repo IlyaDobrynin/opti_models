@@ -49,7 +49,7 @@ For list of all models see [MODELS.md](/opti_models/models/MODELS.md)
 ## Benchmarks
 
 ### Imagenet
-For all imagenet benchmarks you should download and untar: https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing
+For all imagenet benchmarks you should download and untar: да, 
 
 #### Torch Imagenet Benchmark
 1. In `scripts/benchmarks/torch_imagenet_benchmark.sh` change:

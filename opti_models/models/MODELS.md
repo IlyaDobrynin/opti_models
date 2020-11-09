@@ -3,8 +3,9 @@
 ## Small Imagenet Validation Protocol (SIVP)
 SIVP is the small protocol on the subset of Imagenet Validation Set.
 
-Data: https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing
+Data: https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing <br>
 
+All fps given for batch_size=1, i7-7800x + 1080ti<br>
 For reproduce instructions see [README.md](../../README.md) 
 
 | Model Name | TOP@1 Acc / Err | TOP@5 Acc / Err  | TRT FPS | Torch FPS |
@@ -26,5 +27,4 @@ For reproduce instructions see [README.md](../../README.md)
 | genet_normal  | 81.64 / 18.36  | 96.10 / 3.90  | 2579.9  | 190.2  |
 | genet_large**  | 82.39 / 17.61  | 96.54 / 3.46  | 1734.2 | 176.4  |
 
-* All fps given for batch_size=1, i7-7800x + 1080ti<br>
 ** genet_large model tested on 256x256 image size
