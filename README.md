@@ -30,15 +30,15 @@ pip install --upgrade nvidia-tensorrt
 
 1. Run:
 ```
-    python opti_models/convertations/cvt_onnx.py --model_name MODEL_NAME --export_dir EXPORT_ONNX_DIR --is_torchvision IS_TORCHVISION --ckpt_path CKPT_PATH --batch_size BATCH_SIZE --in_size IN_SIZE --num_classes NUM_CLASSES    
+    python opti_models/convertations/cvt_onnx.py --model_name MODEL_NAME --export_dir EXPORT_ONNX_DIR --model_mode 'torchvision' --ckpt_path CKPT_PATH --batch_size BATCH_SIZE --in_size IN_SIZE --num_classes NUM_CLASSES    
 ```
 For instance, in order to convert ResNet18 with ImageNet pretraning run:
 ```
-    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --is_torchvision True --batch_size 1 --in_size 224 224
+    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --model_mode 'torchvision' True --batch_size 1 --in_size 224 224
 ```
 For instance, in order to convert you own ResNet18 torchvision model with custom weights run:
 ```
-    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --is_torchvision True --batch_size 1 --in_size 224 224 --ckpt_path CKPT_PATH --num_classes NUM_CLASSES
+    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --model_mode 'torchvision' True --batch_size 1 --in_size 224 224 --ckpt_path CKPT_PATH --num_classes NUM_CLASSES
 ```
 
 If you're converting your own model with custom `NUM_CLASSES`, opti_models simply changes the last FC layer of the network, so that the output dimention is equal to `NUM_CLASSES`, instead of 1000 in the ImageNet pretraining. If you have a custom head (or the entire model) — check [ONNX Convertation with Python — Custom Model](#onnx-convertation-with-python--custom-model)
@@ -62,7 +62,7 @@ Change this to `model = GetCustomModel()`, and you're good to go. Note that it's
 1. In `scripts/convertations/onnx_convertation.sh` change:
     - `model_name` - name of the model to convert
     - `export_dir` - directory to export onnx converted file (default `data/onnx_export`)
-    - `is_torchvision` - whether the model is a torchvision model with a changed num_classes in the head (default `False`)
+    - `model_mode` - whether this model is from torchvision, opti_models, or your custom model (default 'torchvision')
     - `ckpt_path` - path to checkpoint (default `imagenet` for regular ImageNet pretraining)
     - `batch_size` - batch size for converted model (default `1`) 
     - `in_size` - image size (default `224 224`)
