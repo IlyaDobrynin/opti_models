@@ -43,7 +43,7 @@ For instance, in order to convert you own ResNet18 torchvision model with custom
 
 If you're converting your own model with custom `NUM_CLASSES`, opti_models simply changes the last FC layer of the network, so that the output dimention is equal to `NUM_CLASSES`, instead of 1000 in the ImageNet pretraining. If you have a custom head (or the entire model) — check [ONNX Convertation with Python — Custom Model](#onnx-convertation-with-python--custom-model)
 
-By default, cvt_onnx.py will generate 2 outputs: regular .onnx file and a simplified version of it, obtained with ONNX simplifier. 
+By default, `cvt_onnx.py` will generate 2 outputs: regular `.onnx` file and a simplified version of it, obtained with ONNX simplifier. 
 
 
 ### ONNX Convertation with Python — Custom Model
