@@ -51,9 +51,8 @@ By default, `cvt_onnx.py` will generate 2 outputs: regular `.onnx` file and a si
 The script for convertation is `cvt_onxx.py`. In order to convert something entirely custom, you need to change just 1 line of script. In particular, 96th line:
 
 ````
-elif model_mode == 'custom':
-    # Implement your own Model Class
-    model = None
+# Implement your own Model Class
+model = None
 ````
 Change this to `model = GetCustomModel()`, and you're good to go. Note that it's not guaranteed for custom models to successfully convert to ONNX or TRT, since some operations simply are not supported by either ONNX or TRT.   
 
