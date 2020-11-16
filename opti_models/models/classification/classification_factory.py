@@ -4,6 +4,7 @@ Module implements classification autobuilder class
 
 """
 import gc
+import torch
 from torch import nn
 from collections import OrderedDict
 from ..backbones import backbone_factory
@@ -30,12 +31,11 @@ class ClassificationFactory(nn.Module):
             activation_type: str = 'relu',
             depthwise: bool = False
     ):
-
         super().__init__()
 
         assert backbone in backbone_factory.BACKBONES.keys(), \
-            f"Wrong name of backbone: {backbone}. " \
-                f"Should be in {backbone_factory.BACKBONES.keys()}."
+            f"Specify correct model_name. For opti_models should be one of the following: " \
+                f"{list(backbone_factory.BACKBONES.keys())}."
 
         self.num_input_channels = num_input_channels
         self.depthwise = depthwise
@@ -45,11 +45,14 @@ class ClassificationFactory(nn.Module):
         self.depth = depth
         self.backbone = backbone
 
+        
         self.encoder = backbone_factory.get_backbone(
             name=self.backbone,
             pretrained=pretrained,
             requires_grad=unfreeze_encoder
         )
+       
+    
         if num_input_channels != 3:
             patch_first_conv(model=self.encoder, in_channels=num_input_channels)
         self.encoder_layers_dict = encoder_dict[backbone]['skip']

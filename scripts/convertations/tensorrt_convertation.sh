@@ -1,4 +1,4 @@
-onnx_path="data/onnx_export/genet_small_bs-1_res-224x224_simplified.onnx"
+onnx_path="data/onnx_export/resnet18/resnet18_bs-1_res-224x224_simplified.onnx"
 export_dir="data/trt_export"
 batch_size=1
 fp_type="32"

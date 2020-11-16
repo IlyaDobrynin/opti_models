@@ -2,12 +2,14 @@ import os
 import typing as t
 import onnx
 import torch
+import torchvision
 import onnxruntime as ort
 from onnxsim import simplify
 import argparse
 import logging
 from torchsummary import summary
 from opti_models.models import models_facade
+from opti_models.models import t_models
 
 logging.basicConfig(level=logging.INFO)
 sub_prefix = ">>>>> "
@@ -15,11 +17,35 @@ sub_prefix = ">>>>> "
 __all__ = ["make_onnx_convertation"]
 
 
-def get_model(model_name: str, input_shape: t.Tuple, show: bool = False) -> torch.nn.Module:
-    models_facade_obj = models_facade.ModelFacade(task="backbones")
-    model = models_facade_obj.get_model_class(
-        model_definition=model_name
-    )(requires_grad=False, pretrained='imagenet')
+
+def get_model(model_name: str, input_shape: t.Tuple, model_mode: str, num_classes: int, ckpt_path: str, show: bool = False) -> torch.nn.Module:
+    m_facade = models_facade.ModelFacade(task='classification')
+    if model_mode == 'torchvision':
+        if ckpt_path == 'imagenet':
+            assert model_name in t_models.T_BACKBONES.keys(), 'Specify correct model_name. For {} should be one of the following: {}'.format(model_mode, t_models.show_available_backbones()[0])
+            model = t_models.T_BACKBONES[model_name](pretrained=True)
+            
+        else:
+            model = torchvision.models.resnet18(pretrained=False)
+            model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+            model.load_state_dict(torch.load(ckpt_path))
+    else:
+        if ckpt_path == 'imagenet':
+            pretrained = ckpt_path
+        else:
+            pretrained = None
+
+        model_params = dict(
+                backbone=model_name,
+                depth=5,
+                num_classes=num_classes,
+                pretrained=pretrained)
+        model = m_facade.get_model_class(
+            model_definition='basic_classifier')(**model_params)
+        
+        if ckpt_path != 'imagenet':
+            model.load_state_dict(torch.load(ckpt_path))
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.eval().to(device)
     if show:
@@ -43,6 +69,9 @@ def make_onnx_convertation(
         batch_size: int,
         model_name: str,
         in_size: t.Tuple,
+        model_mode:str,
+        num_classes: int,
+        ckpt_path: str,
         info: bool = False
 ):
     if info:
@@ -54,11 +83,24 @@ def make_onnx_convertation(
         model_name=model_name,
         in_size=in_size
     )
-
-    model = get_model(
-        model_name=model_name,
-        input_shape=input_size[1:]
-    )
+    if model_mode in ['torchvision', 'opti']:
+        model = get_model(
+                model_name=model_name,
+                input_shape=input_size[1:],
+                model_mode=model_mode,
+                num_classes=num_classes,
+                ckpt_path=ckpt_path
+            )
+    elif model_mode == 'custom':
+        # Implement your own Model Class
+        model = None
+        
+        if model == None:
+            raise NotImplemented('Implement your own Model Class') 
+        model.load_state_dict(torch.load(ckpt_path))
+    else:
+        raise Exception('Specify correct model_mode. Should be one of the following: [\'opti\', \'torchvision\', \'custom\']')
+    
 
     dummy_input = torch.ones(input_size, device="cuda")
     with torch.no_grad():
@@ -116,6 +158,9 @@ def main(args):
     model_name = args.model_name
     batch_size = args.batch_size
     in_size = args.in_size
+    model_mode = args.model_mode
+    num_classes = args.num_classes
+    ckpt_path = args.ckpt_path
     export_dir = args.export_dir
     info = args.info
 
@@ -124,6 +169,9 @@ def main(args):
         batch_size=batch_size,
         model_name=model_name,
         in_size=in_size,
+        model_mode=model_mode,
+        num_classes=num_classes,
+        ckpt_path=ckpt_path,
         info=info
     )
 
@@ -137,6 +185,9 @@ def parse_args():
     parser.add_argument('--export_dir', default=export_dir)
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--in_size', nargs="+", default=in_size, type=int)
+    parser.add_argument('--model_mode', default='torchvision', type=str)
+    parser.add_argument('--num_classes', default=1000, type=int)
+    parser.add_argument('--ckpt_path', default='imagenet', type=str)
     parser.add_argument('--info', type=bool, default=True)
 
     return parser.parse_args()
