@@ -62,7 +62,7 @@ Change this to `model = GetCustomModel()`, and you're good to go. Note that it's
 1. In `scripts/convertations/onnx_convertation.sh` change:
     - `model_name` - name of the model to convert
     - `export_dir` - directory to export onnx converted file (default `data/onnx_export`)
-    - `model_mode` - whether this model is from torchvision, opti_models, or your custom model (default 'torchvision')
+    - `model_mode` - whether this model is from torchvision, opti_models, or your custom model (default `torchvision`)
     - `ckpt_path` - path to checkpoint (default `imagenet` for regular ImageNet pretraining)
     - `batch_size` - batch size for converted model (default `1`) 
     - `in_size` - image size (default `224 224`)
