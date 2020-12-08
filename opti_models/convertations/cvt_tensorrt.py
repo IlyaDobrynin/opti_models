@@ -79,7 +79,7 @@ def make_trt_convertation(
     export_dir = os.path.join(export_dir, model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-    out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[0]}.engine"
+    out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[1]}.engine"
     export_path = os.path.join(export_dir, out_model_name)
 
     trt_datatype = run_checks(fp_type, onnx_model_path)
