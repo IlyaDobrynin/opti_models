@@ -26,27 +26,39 @@ pip install --upgrade nvidia-tensorrt
 
 
 
-### ONNX Convertation with Python
+### ONNX Convertation
 
 1. Run:
 ```
-    python opti_models/convertations/cvt_onnx.py --model_name MODEL_NAME --export_dir EXPORT_ONNX_DIR --is_torchvision IS_TORCHVISION --ckpt_path CKPT_PATH --batch_size BATCH_SIZE --in_size IN_SIZE --num_classes NUM_CLASSES    
+    python opti_models/convertations/cvt_onnx.py --model-name BACKBONE_NAME
 ```
+
 For instance, in order to convert ResNet18 with ImageNet pretraning run:
 ```
-    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --is_torchvision True --batch_size 1 --in_size 224 224
+    python opti_models/convertations/cvt_onnx.py --model-name resnet18
 ```
-For instance, in order to convert you own ResNet18 torchvision model with custom weights run:
+For instance, in order to convert you own ResNet18 torchvision model with batch size 1, image size 224x224, num classes 1 and custom weights run:
 ```
-    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --is_torchvision True --batch_size 1 --in_size 224 224 --ckpt_path CKPT_PATH --num_classes NUM_CLASSES
+    python opti_models/convertations/cvt_onnx.py --model-name resnet18 --model-path CKPT-PATH --batch_size 1 --size 224 224 --num-classes 1
 ```
+
+Parameters cheatsheet:
+
+- `model-name` (str) - Name of the backbone (required).
+- `model-path` (str) - Path to the model. Default: `ImageNet` (optional)
+- `batch-size` (int) - Batch size for converted model. Default: `1` (optional).
+- `size` (int int) - Image size. Default: `224 224` (optional).
+- `num-classes` (int) - Num classes in the head for torchvision models.  Default: `1000` (optional).
+- `model-mode` (str) - `torchvision` for models from torchvision zoo, `custom` for your own torchvision models. Default: `torchvision` (optional).
+- `export-dir` (str) - Directory to export onnx converted files. Default: `data/onnx-export` (optional).
+
 
 If you're converting your own model with custom `NUM_CLASSES`, opti_models simply changes the last FC layer of the network, so that the output dimention is equal to `NUM_CLASSES`, instead of 1000 in the ImageNet pretraining. If you have a custom head (or the entire model) — check [ONNX Convertation with Python — Custom Model](#onnx-convertation-with-python--custom-model)
 
 By default, cvt_onnx.py will generate 2 outputs: regular .onnx file and a simplified version of it, obtained with ONNX simplifier. 
 
 
-### ONNX Convertation with Python — Custom Model
+### ONNX Convertation — Custom Model
 
 The script for convertation is `cvt_onxx.py`. In order to convert something entirely custom, you need to change just 1 line of script. In particular, 96th line:
 
@@ -58,44 +70,27 @@ elif model_mode == 'custom':
 Change this to `model = GetCustomModel()`, and you're good to go. Note that it's not guaranteed for custom models to successfully convert to ONNX or TRT, since some operations simply are not supported by either ONNX or TRT.   
 
 
-### ONNX Convertation with Bash:
-
-1. In `scripts/convertations/onnx_convertation.sh` change:
-    - `model_name` - name of the model to convert
-    - `export_dir` - directory to export onnx converted file (default `data/onnx_export`)
-    - `is_torchvision` - whether the model is a torchvision model with a changed num_classes in the head (default `False`)
-    - `ckpt_path` - path to checkpoint (default `imagenet` for regular ImageNet pretraining)
-    - `batch_size` - batch size for converted model (default `1`) 
-    - `in_size` - image size (default `224 224`)
-    - `num_classes` - when loading torchvision model, specify the num_classes in the head (default `1000`)
-2. Run:
-```
-    bash scripts/convertations/onnx_convertation.sh
-```
-
-### TensorRT Convertation with Python
+### TensorRT Convertation
 
 1. Run:
 ```
-    python opti_models/convertations/cvt_tensorrt.py --onnx_path ONNX_MODEL_PATH --export_dir EXPORT_TRT_DIR --batch_size BATCH_SIZE--in_size IN_SIZE -fp_type PRECISION_TYPE    
+    python opti_models/convertations/cvt_tensorrt.py --onnx-path 
 ```
 
 For instance, in order to convert the previously converted ResNet18 model to TRT run:
 
 ```
-    python opti_models/convertations/cvt_tensorrt.py --onnx_path data/onnx_export/resnet18/resnet18_bs-1_res-224x224_simplified.onnx --export_dir data/trt_export --batch_size 1 --in_size 224 224 --fp_type 32
+    python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx_export/resnet18/resnet18_bs-1_res-224x224_simplified.onnx 
 ```
-### TensorRT Convertation with Bash
 
-1. In `scripts/convertations/tensorrt_convertation.sh` change:
-    - `onnx_path` - path to the ONNX file
-    - `export_dir` - directory to export converted file (default `data/trt_export`)
-    - `batch_size` - batch size for converted model (default = 1) 
-    - `fp_type` - type of float point precision, could be "16" or "32" (default = "32") 
-2. Run:
-```
-    bash scripts/convertations/tensorrt_convertation.sh
-```
+Parameters cheatsheet:
+
+
+- `onnx-path` (str) - Path to the exported onnx model (required).
+- `batch-size` (int) - Batch size for converted model. Default: `1` (optional).
+- `precision` (str) - Precision of the TRT engine, 32 (for FP32) or 16 (for FP16). Default: `32` (optional).
+- `export-dir` (str) - Directory to export TRT engine . Default: `data/trt-export` (optional).
+
 
 ## Models
 For list of all models see [MODELS.md](/opti_models/models/MODELS.md)

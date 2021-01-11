@@ -17,34 +17,33 @@ sub_prefix = ">>>>> "
 __all__ = ["make_onnx_convertation"]
 
 
-
-def get_model(model_name: str, input_shape: t.Tuple, model_mode: str, num_classes: int, ckpt_path: str, show: bool = False) -> torch.nn.Module:
-    m_facade = models_facade.ModelFacade(task='classification')
+def get_model(model_name: str, input_shape: t.Tuple, model_mode: str, num_classes: int, model_path: str, show: bool = False) -> torch.nn.Module:
+    # m_facade = models_facade.ModelFacade(task='classification')
     if model_mode == 'torchvision':
-        if ckpt_path == 'imagenet':
+        if model_path == 'ImageNet':
             assert model_name in t_models.T_BACKBONES.keys(), 'Specify correct model_name. For {} should be one of the following: {}'.format(model_mode, t_models.show_available_backbones()[0])
             model = t_models.T_BACKBONES[model_name](pretrained=True)
             
         else:
-            model = torchvision.models.resnet18(pretrained=False)
+            model = t_models.T_BACKBONES[model_name](pretrained=False)
             model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
-            model.load_state_dict(torch.load(ckpt_path))
-    else:
-        if ckpt_path == 'imagenet':
-            pretrained = ckpt_path
-        else:
-            pretrained = None
-
-        model_params = dict(
-                backbone=model_name,
-                depth=5,
-                num_classes=num_classes,
-                pretrained=pretrained)
-        model = m_facade.get_model_class(
-            model_definition='basic_classifier')(**model_params)
-        
-        if ckpt_path != 'imagenet':
-            model.load_state_dict(torch.load(ckpt_path))
+            model.load_state_dict(torch.load(model_path))
+    # else:
+    #     if ckpt_path == 'ImageNet':
+    #         pretrained = ckpt_path
+    #     else:
+    #         pretrained = None
+    #
+    #     model_params = dict(
+    #             backbone=model_name,
+    #             depth=5,
+    #             num_classes=num_classes,
+    #             pretrained=pretrained)
+    #     model = m_facade.get_model_class(
+    #         model_definition='basic_classifier')(**model_params)
+    #
+    #     if ckpt_path != 'ImageNet':
+    #         model.load_state_dict(torch.load(ckpt_path))
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.eval().to(device)
@@ -71,10 +70,10 @@ def make_onnx_convertation(
         in_size: t.Tuple,
         model_mode:str,
         num_classes: int,
-        ckpt_path: str,
-        info: bool = False
+        model_path: str,
+        verbose: bool = False
 ):
-    if info:
+    if verbose:
         logging.info("\tConvert to ONNX: START")
 
     export_path, export_simple_path, input_size = get_parameters(
@@ -83,24 +82,23 @@ def make_onnx_convertation(
         model_name=model_name,
         in_size=in_size
     )
-    if model_mode in ['torchvision', 'opti']:
+    if model_mode == 'torchvision':
         model = get_model(
                 model_name=model_name,
                 input_shape=input_size[1:],
                 model_mode=model_mode,
                 num_classes=num_classes,
-                ckpt_path=ckpt_path
+                model_path=model_path
             )
     elif model_mode == 'custom':
         # Implement your own Model Class
         model = None
         
-        if model == None:
+        if model is None:
             raise NotImplemented('Implement your own Model Class') 
         model.load_state_dict(torch.load(ckpt_path))
     else:
         raise Exception('Specify correct model_mode. Should be one of the following: [\'opti\', \'torchvision\', \'custom\']')
-    
 
     dummy_input = torch.ones(input_size, device="cuda")
     with torch.no_grad():
@@ -109,47 +107,59 @@ def make_onnx_convertation(
 
     input_names = ["input"]
     output_names = ["output"]
-    torch.onnx.export(
-        model=model,
-        args=dummy_input,
-        f=export_path,
-        input_names=input_names,
-        output_names=output_names,
-        example_outputs=dummy_output,
-        opset_version=11,
-        export_params=True,
-    )
-    if info:
-        logging.info("\tConvert to ONNX: SUCCESS")
 
-    onnx_model = onnx.load(export_path)
-    onnx.checker.check_model(onnx_model)
+    try:
+        torch.onnx.export(
+            model=model,
+            args=dummy_input,
+            f=export_path,
+            input_names=input_names,
+            output_names=output_names,
+            example_outputs=dummy_output,
+            opset_version=11,
+            export_params=True,
+        )
+    except:
+        print('Convert to ONNX: FAIL')
+    else:
+        if verbose:
+         logging.info("\tConvert to ONNX: SUCCESS")
 
-    if info:
-        logging.info("\tONNX check: SUCCESS")
-        logging.info("\tConvert to ONNX Simplified: START")
+    try:
+        onnx_model = onnx.load(export_path)
+        onnx.checker.check_model(onnx_model)
+    except:
+        print('ONNX check: FAIL')
+    else:
+        if verbose:
+            logging.info("\tONNX check: SUCCESS")
+            logging.info("\tConvert to ONNX Simplified: START")
 
     # Simplified ONNX convertation
     model_simp, check = simplify(onnx_model, skip_fuse_bn=True)
     assert check, "Simplified ONNX model could not be validated"
     onnx.save(model_simp, export_simple_path)
 
-    if info:
+    if verbose:
         logging.info("\tConvert to ONNX Simplified: SUCCESS")
         logging.info("\tResult validation: START")
 
     # Check the result
-    ort_session = ort.InferenceSession(export_simple_path)
-    outputs = ort_session.run(None, {"input": dummy_input.cpu().numpy()})
+
+    try:
+        ort_session = ort.InferenceSession(export_simple_path)
+        outputs = ort_session.run(None, {"input": dummy_input.cpu().numpy()})
+    except:
+        print('Can\'t start onnxruntime session')
 
     if outputs[0].shape != dummy_output.shape:
         if os.path.exists(export_path):
             os.remove(export_path)
         if os.path.exists(export_simple_path):
             os.remove(export_simple_path)
-        raise Exception('Results validation: FAILED')
+        raise Exception('Results validation: FAIL')
 
-    if info:
+    if verbose:
         logging.info("\tResult validation: SUCCESS")
         logging.info(f"\t{sub_prefix}Result dim = {outputs[0].shape}")
 
@@ -157,12 +167,12 @@ def make_onnx_convertation(
 def main(args):
     model_name = args.model_name
     batch_size = args.batch_size
-    in_size = args.in_size
+    in_size = args.size
     model_mode = args.model_mode
     num_classes = args.num_classes
-    ckpt_path = args.ckpt_path
+    model_path = args.model_path
     export_dir = args.export_dir
-    info = args.info
+    verbose = args.verbose
 
     make_onnx_convertation(
         export_dir=export_dir,
@@ -171,24 +181,21 @@ def main(args):
         in_size=in_size,
         model_mode=model_mode,
         num_classes=num_classes,
-        ckpt_path=ckpt_path,
-        info=info
+        model_path=model_path,
+        verbose=verbose
     )
 
 
 def parse_args():
-    model_name = "mobilenetv3_large_w1"
-    export_dir = f"../../data/onnx_export"
-    in_size = (224, 224)
     parser = argparse.ArgumentParser(description='TRT params')
-    parser.add_argument('--model_name', default=model_name, type=str)
-    parser.add_argument('--export_dir', default=export_dir)
-    parser.add_argument('--batch_size', default=1, type=int)
-    parser.add_argument('--in_size', nargs="+", default=in_size, type=int)
-    parser.add_argument('--model_mode', default='torchvision', type=str)
-    parser.add_argument('--num_classes', default=1000, type=int)
-    parser.add_argument('--ckpt_path', default='imagenet', type=str)
-    parser.add_argument('--info', type=bool, default=True)
+    parser.add_argument('--model-name', type=str)
+    parser.add_argument('--model-path', type=str, default='ImageNet')
+    parser.add_argument('--export-dir', default='data/onnx-export')
+    parser.add_argument('--batch-size', default=1)
+    parser.add_argument('--size', nargs='+', default=(224,224),type=int)
+    parser.add_argument('--num-classes', default=1000, type=int)
+    parser.add_argument('--model-mode', default='torchvision', type=str)
+    parser.add_argument('--verbose', default=True, type=bool)
 
     return parser.parse_args()
 
