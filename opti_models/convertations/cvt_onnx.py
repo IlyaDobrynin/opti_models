@@ -70,11 +70,14 @@ def get_model(
     else:
         raise NotImplementedError(
             f"Model type {model_type} not implemented."
-            f"Use one of ['default', 'default_patch', 'classifier']"
+            f"Use one of ['backbone', 'classifier', 'custom']"
         )
 
-    if model_path:
-        model.load_state_dict(torch.load(model_path))
+    if isinstance(model_path, str) and model_path != 'ImageNet':
+        if os.path.exists(model_path):
+            model.load_state_dict(torch.load(model_path))
+        else:
+            raise FileNotFoundError(f"No such file or directory: {model_path}")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.eval().to(device)
@@ -219,7 +222,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='TRT params')
     parser.add_argument('--model-name', type=str, help="Name of the model")
     parser.add_argument('--model-type', default='backbone', type=str, help="Type of the model")
-    parser.add_argument('--model-path', type=str, default=None, help="Path to the pretrained weights, or ImageNet,"
+    parser.add_argument('--model-path', type=str, default='ImageNet', help="Path to the pretrained weights, or ImageNet,"
                                                                      "if you want to get model with imagenet pretrain")
     parser.add_argument('--export-dir', default='data/onnx-export', help="Path to directory to save results")
     parser.add_argument('--batch-size', default=1, help="Batch size for optimized model")
