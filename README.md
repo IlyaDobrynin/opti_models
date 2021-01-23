@@ -147,17 +147,18 @@ Parameters cheatsheet:
 - `size` (int int, optional) - Image size. Default: `224 224`.
 
 ## Simple pipeline example
-Let's sum up simple end2end pipeline for convertations and benchmarking:
+#### Let's sum up simple end2end pipeline for convertations and benchmarking:
 1. First let's run simple pytorch speed benchmark with resnet18: 
 ```
 python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name resnet18
 
 Output:
-INFO:root:      BENCHMARK FOR resnet18
+INFO:root:      TORCH BENCHMARK FOR resnet18: START
 100%|█████████████| 10000/10000 [01:28<00:00, 112.92it/s]
 INFO:root:      Average fps: 213.2855109396426
 INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
 INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
+INFO:root:      BENCHMARK FOR resnet18: SUCCESS
 ```
 2. Then, convert this model to ONNX:
 ```
@@ -195,8 +196,8 @@ INFO:root:      Convert to TensorRT: SUCCESS
 python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_bs-1_res-224x224.engine
 
 Output:
-INFO:root:      BENCHMARK FOR resnet18: START
-100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10000/10000 [01:17<00:00, 129.49it/s]
+INFO:root:      TENSORRT BENCHMARK FOR resnet18: START
+100%|█████████████| 10000/10000 [01:17<00:00, 129.49it/s]
 INFO:root:      Average fps: 1005.4750549267463
 INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
 INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51

@@ -67,13 +67,13 @@ class SimpleBenchmark:
         )
         dataloader = self._make_dataloader(data_df=labels_df)
 
-        logging.info(f"\tBENCHMARK FOR {self.model_name}")
+        logging.info(f"\tTORCH BENCHMARK FOR {self.model_name}: START")
         preds_dict = self._inference_loop(dataloader=dataloader, model=model)
-
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
         for rank, rank_metric in zip(ranks, rank_metrics):
             logging.info(f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}"
                          f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}")
+        logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
 
 
 def parse_args():

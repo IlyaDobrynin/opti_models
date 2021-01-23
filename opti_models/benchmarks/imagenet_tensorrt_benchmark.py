@@ -79,7 +79,7 @@ class TensorRTBenchmark:
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
         labels_df = prepare_data(path_to_images=path_to_images)
 
-        logging.info(f"\tBENCHMARK FOR {self.model_name}: START")
+        logging.info(f"\tTENSORRT BENCHMARK FOR {self.model_name}: START")
         preds_dict = self._inference_loop(labels_df=labels_df)
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
         for rank, rank_metric in zip(ranks, rank_metrics):
