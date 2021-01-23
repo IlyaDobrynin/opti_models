@@ -24,8 +24,6 @@ pip install --upgrade nvidia-tensorrt
 ## Convertation
 **CURRENTLY IN DEV MODE**
 
-
-
 ### ONNX Convertation
 
 1. Run:
@@ -67,7 +65,8 @@ elif model_mode == 'custom':
     # Implement your own Model Class
     model = None
 ````
-Change this to `model = GetCustomModel()`, and you're good to go. Note that it's not guaranteed for custom models to successfully convert to ONNX or TRT, since some operations simply are not supported by either ONNX or TRT.   
+Change this to `model = GetCustomModel()`, and you're good to go. Note that it's not guaranteed for custom models to 
+successfully convert to ONNX or TRT, since some operations simply are not supported by either ONNX or TRT.   
 
 
 ### TensorRT Convertation

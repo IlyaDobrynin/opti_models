@@ -65,95 +65,65 @@ def modify_resnets(model):
     return model
 
 
-def resnet18(num_classes: int = 1000, pretrained: str = 'imagenet', requires_grad: bool = True):
+def resnet18(num_classes: int = 1000, pretrained: bool = True, requires_grad: bool = True):
     """Constructs a ResNet-18 model.
     """
     model = models.resnet18(pretrained=False)
-    if pretrained is not None:
-        if pretrained == 'imagenet':
-            settings = pretrained_settings['resnet18'][pretrained]
-            model = load_pretrained(model, num_classes, settings)
-        else:
-            raise ValueError(
-                f"Unknown pretrain name: {pretrained}. "
-                f"Should be 'imagenet' or None"
-            )
+    if pretrained:
+        settings = pretrained_settings['resnet18']['imagenet']
+        model = load_pretrained(model, num_classes, settings)
     model = modify_resnets(model)
     for params in model.parameters():
         params.requires_grad = requires_grad
     return model
 
 
-def resnet34(num_classes: int = 1000, pretrained: str = 'imagenet', requires_grad: bool = True):
+def resnet34(num_classes: int = 1000, pretrained: bool = True, requires_grad: bool = True):
     """Constructs a ResNet-34 model.
     """
     model = models.resnet34(pretrained=False)
-    if pretrained is not None:
-        if pretrained == 'imagenet':
-            settings = pretrained_settings['resnet34'][pretrained]
-            model = load_pretrained(model, num_classes, settings)
-        else:
-            raise ValueError(
-                f"Unknown pretrain name: {pretrained}. "
-                f"Should be 'imagenet' or None"
-            )
+    if pretrained:
+        settings = pretrained_settings['resnet34']['imagenet']
+        model = load_pretrained(model, num_classes, settings)
     model = modify_resnets(model)
     for params in model.parameters():
         params.requires_grad = requires_grad
     return model
 
 
-def resnet50(num_classes: int = 1000, pretrained: str = 'imagenet', requires_grad: bool = True):
+def resnet50(num_classes: int = 1000, pretrained: bool = True, requires_grad: bool = True):
     """Constructs a ResNet-50 model.
     """
     model = models.resnet50(pretrained=False)
-    if pretrained is not None:
-        if pretrained == 'imagenet':
-            settings = pretrained_settings['resnet50'][pretrained]
-            model = load_pretrained(model, num_classes, settings)
-        else:
-            raise ValueError(
-                f"Unknown pretrain name: {pretrained}. "
-                f"Should be 'imagenet' or None"
-            )
+    if pretrained:
+        settings = pretrained_settings['resnet50']['imagenet']
+        model = load_pretrained(model, num_classes, settings)
     model = modify_resnets(model)
     for params in model.parameters():
         params.requires_grad = requires_grad
     return model
 
 
-def resnet101(num_classes: int = 1000, pretrained: str = 'imagenet', requires_grad: bool = True):
+def resnet101(num_classes: int = 1000, pretrained: bool = True, requires_grad: bool = True):
     """Constructs a ResNet-101 model.
     """
     model = models.resnet101(pretrained=False)
-    if pretrained is not None:
-        if pretrained == 'imagenet':
-            settings = pretrained_settings['resnet101'][pretrained]
-            model = load_pretrained(model, num_classes, settings)
-        else:
-            raise ValueError(
-                f"Unknown pretrain name: {pretrained}. "
-                f"Should be 'imagenet' or None"
-            )
+    if pretrained:
+        settings = pretrained_settings['resnet101']['imagenet']
+        model = load_pretrained(model, num_classes, settings)
     model = modify_resnets(model)
     for params in model.parameters():
         params.requires_grad = requires_grad
     return model
 
 
-def resnet152(num_classes: int = 1000, pretrained: str = 'imagenet', requires_grad: bool = True):
+def resnet152(num_classes: int = 1000, pretrained: bool = True, requires_grad: bool = True):
     """Constructs a ResNet-152 model.
     """
     model = models.resnet152(pretrained=False)
-    if pretrained is not None:
-        if pretrained == 'imagenet':
-            settings = pretrained_settings['resnet152'][pretrained]
-            model = load_pretrained(model, num_classes, settings)
-        else:
-            raise ValueError(
-                f"Unknown pretrain name: {pretrained}. "
-                f"Should be 'imagenet' or None"
-            )
+    if pretrained:
+        settings = pretrained_settings['resnet152']['imagenet']
+        model = load_pretrained(model, num_classes, settings)
     model = modify_resnets(model)
     for params in model.parameters():
         params.requires_grad = requires_grad

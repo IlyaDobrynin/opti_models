@@ -85,10 +85,10 @@ class SimpleBenchmark:
 def parse_args():
     # Default args
     path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    model_name = "genet_small"
+    model_name = "vgg11"
     in_size = (224, 224)
-    batch_size = 1
-    workers = 1
+    batch_size = 64
+    workers = 11
 
     parser = ArgumentParser()
     parser.add_argument('--path_to_images', default=path_to_images, type=str)

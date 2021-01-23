@@ -359,7 +359,7 @@ def get_efficientnet(version,
                      tf_mode=False,
                      bn_eps=1e-5,
                      model_name=None,
-                     pretrained: str = 'imagenet',
+                     pretrained: bool = True,
                      root=os.path.join("~", ".torch", "models"),
                      **kwargs):
     """
@@ -472,7 +472,7 @@ def get_efficientnet(version,
         in_size=in_size,
         **kwargs)
 
-    if pretrained == 'imagenet':
+    if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
 

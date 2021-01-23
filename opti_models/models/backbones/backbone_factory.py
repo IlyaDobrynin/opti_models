@@ -3,7 +3,15 @@
 Simple backbones factory
 """
 from . import (
+    # Torchvision models
     resnet18, resnet34, resnet50, resnet101, resnet152,
+    vgg11, vgg11_bn, vgg13, vgg13_bn, vgg16, vgg16_bn, vgg19, vgg19_bn,
+    densenet121, densenet161, densenet169, densenet201,
+    inception_v3,
+    resnext50_32x4d, resnext101_32x8d,
+    wide_resnet50_2, wide_resnet101_2,
+    mobilenet_v2,
+
     mobilenetv2_w1, mobilenetv2_wd2, mobilenetv2_wd4, mobilenetv2_w3d4,
     mobilenetv3_large_w1,
     mixnet_s, mixnet_m, mixnet_l,
@@ -17,12 +25,30 @@ from . import (
 
 
 BACKBONES = {
-    # Resnets
+    # Torchvision models
     "resnet152": resnet152,
     "resnet101": resnet101,
     "resnet50": resnet50,
     "resnet34": resnet34,
     "resnet18": resnet18,
+    'mobilenet_v2': mobilenet_v2,
+    'vgg11': vgg11,
+    'vgg11_bn': vgg11_bn,
+    'vgg13': vgg13,
+    'vgg13_bn': vgg13_bn,
+    'vgg16': vgg16,
+    'vgg16_bn': vgg16_bn,
+    'vgg19': vgg19,
+    'vgg19_bn': vgg19_bn,
+    'densenet121': densenet121,
+    'densenet169': densenet169,
+    'densenet161': densenet161,
+    'densenet201': densenet201,
+    'inception_v3': inception_v3,
+    'resnext50_32x4d': resnext50_32x4d,
+    'resnext101_32x8d': resnext101_32x8d,
+    'wide_resnet50': wide_resnet50_2,
+    'wide_resnet101': wide_resnet101_2,
 
     # Mobilenets
     "mobilenetv2_w1": mobilenetv2_w1,
@@ -76,3 +102,7 @@ def get_backbone(name, *args, **kwargs):
     :return: Model
     """
     return BACKBONES[name](*args, **kwargs)
+
+
+def show_available_backbones():
+    return list(BACKBONES.keys())
