@@ -42,31 +42,38 @@ For instance, in order to convert you own ResNet18 torchvision model with batch 
 
 Parameters cheatsheet:
 
-- `model-name` (str) - Name of the backbone (required).
-- `model-path` (str) - Path to the model. Default: `ImageNet` (optional)
-- `batch-size` (int) - Batch size for converted model. Default: `1` (optional).
-- `size` (int int) - Image size. Default: `224 224` (optional).
-- `num-classes` (int) - Num classes in the head for torchvision models.  Default: `1000` (optional).
-- `model-mode` (str) - `torchvision` for models from torchvision zoo, `custom` for your own torchvision models. Default: `torchvision` (optional).
-- `export-dir` (str) - Directory to export onnx converted files. Default: `data/onnx-export` (optional).
+- `model-name` (str, required) - Name of the model.
+- `model-type` (str, optional) - Type of the model. Default: `backbone`. Options:
+  - `backbone` - simply backbone classification model
+  - `classifier` - opti-models classification model
+  - `custom` - your own torchvision models.    
+- `model-path` (str, optional) - Path to the model. Default: `ImageNet` - model with imagenet pretrain.
+- `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
+- `size` (int int, optional) - Image size. Default: `224 224`.
+- `num-classes` (int, optional) - Num classes in the head for backbone model.  Default: `1000`.
+- `export-dir` (str, optional) - Directory to export onnx converted files. Default: `data/onnx-export`.
 
+If you're converting your own model with custom `num-classes`, opti_models simply changes the last FC layer of the network,
+so that the output dimention is equal to `num-classes`, instead of 1000 in the ImageNet pretraining. 
 
-If you're converting your own model with custom `NUM_CLASSES`, opti_models simply changes the last FC layer of the network, so that the output dimention is equal to `NUM_CLASSES`, instead of 1000 in the ImageNet pretraining. If you have a custom head (or the entire model) — check [ONNX Convertation with Python — Custom Model](#onnx-convertation-with-python--custom-model)
+If you have a custom head (or the entire model) — check [ONNX Convertation with Python — Custom Model](#onnx-convertation-with-python--custom-model)
 
 By default, cvt_onnx.py will generate 2 outputs: regular .onnx file and a simplified version of it, obtained with ONNX simplifier. 
 
 
 ### ONNX Convertation — Custom Model
 
-The script for convertation is `cvt_onxx.py`. In order to convert something entirely custom, you need to change just 1 line of script. In particular, 96th line:
+The script for convertation is `cvt_onxx.py`. In order to convert something entirely custom, you need to use python api and 
+provide `model` argument to the `make_onnx_convertation` function.
+Example:
 
 ````
-elif model_mode == 'custom':
-    # Implement your own Model Class
-    model = None
+from opti_models import make_onnx_convertation
+model = MyModel(**my_model_parameters)
+make_onnx_convertation(model=model, **other_parameters)
 ````
-Change this to `model = GetCustomModel()`, and you're good to go. Note that it's not guaranteed for custom models to 
-successfully convert to ONNX or TRT, since some operations simply are not supported by either ONNX or TRT.   
+**Important**: It's not guaranteed for custom models to successfully convert to ONNX or TRT, since some operations 
+simply are not supported by either ONNX or TRT.   
 
 
 ### TensorRT Convertation
@@ -84,11 +91,10 @@ For instance, in order to convert the previously converted ResNet18 model to TRT
 
 Parameters cheatsheet:
 
-
-- `onnx-path` (str) - Path to the exported onnx model (required).
-- `batch-size` (int) - Batch size for converted model. Default: `1` (optional).
-- `precision` (str) - Precision of the TRT engine, 32 (for FP32) or 16 (for FP16). Default: `32` (optional).
-- `export-dir` (str) - Directory to export TRT engine . Default: `data/trt-export` (optional).
+- `onnx-path` (str, required) - Path to the exported onnx model.
+- `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
+- `precision` (str, optional) - Precision of the TRT engine, 32 (for FP32) or 16 (for FP16). Default: `32`.
+- `export-dir` (str, optional) - Directory to export TRT engine . Default: `data/trt-export`.
 
 
 ## Models

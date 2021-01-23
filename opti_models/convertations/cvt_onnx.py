@@ -13,7 +13,7 @@ from opti_models.models import models_facade
 logging.basicConfig(level=logging.INFO)
 sub_prefix = ">>>>> "
 
-__all__ = ["make_onnx_convertation"]
+__all__ = ["make_onnx_convertation", "get_model"]
 
 
 def _patch_last_linear(model: Module, num_classes: int):
@@ -38,13 +38,13 @@ def _patch_last_linear(model: Module, num_classes: int):
 def get_model(
         model_type: str,
         model_name: str,
-        num_classes: t.Optional[int] = 1,
+        num_classes: t.Optional[int] = 1000,
         model_path: t.Optional[str] = None,
         classifier_params: t.Optional[t.Dict] = None,
         show: bool = False,
         input_shape: t.Optional[t.Tuple] = (224, 224, 3),
 ) -> torch.nn.Module:
-    if model_type == 'default':
+    if model_type == 'backbone':
         if model_path == 'ImageNet':
             pretrained = True
         else:
@@ -54,7 +54,7 @@ def get_model(
         model = m_facade.get_model_class(model_definition=model_name)(**parameters)
 
         # Patch last linear layer if needed
-        if num_classes != 1000:
+        if num_classes is not None and num_classes != 1000:
             _patch_last_linear(model=model, num_classes=num_classes)
 
     elif model_type == 'classifier':
@@ -100,7 +100,7 @@ def make_onnx_convertation(
         model_name: str,
         in_size: t.Tuple,
         model_type: str,
-        num_classes: int,
+        num_classes: t.Optional[int] = 1000,
         model_path: t.Optional[str] = None,
         model: t.Optional[torch.nn.Module] = None,
         verbose: t.Optional[bool] = False
@@ -110,8 +110,8 @@ def make_onnx_convertation(
 
     export_path, export_simple_path, input_size = get_parameters(
         export_dir=export_dir,
-        batch_size=batch_size,
         model_name=model_name,
+        batch_size=batch_size,
         in_size=in_size
     )
     if model_type != 'custom':
@@ -197,7 +197,7 @@ def main(args):
     model_name = args.model_name
     batch_size = args.batch_size
     in_size = args.size
-    model_type = args.model_mode
+    model_type = args.model_type
     num_classes = args.num_classes
     model_path = args.model_path
     export_dir = args.export_dir
@@ -217,8 +217,8 @@ def main(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='TRT params')
-    parser.add_argument('model-name', type=str, help="Name of the model")
-    parser.add_argument('model-mode', default='default', type=str, help="Mode of the model")
+    parser.add_argument('--model-name', type=str, help="Name of the model")
+    parser.add_argument('--model-type', default='backbone', type=str, help="Type of the model")
     parser.add_argument('--model-path', type=str, default=None, help="Path to the pretrained weights, or ImageNet,"
                                                                      "if you want to get model with imagenet pretrain")
     parser.add_argument('--export-dir', default='data/onnx-export', help="Path to directory to save results")
