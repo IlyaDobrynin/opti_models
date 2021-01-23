@@ -9,9 +9,11 @@ Repo for the easy-way models convertation.
 3. [Models](#Models)
 4. [Benchmarks](#Benchmarks)
 5. [Simple pipeline example](#Simple-pipeline-example)
-
+6. [Citing](#Citing)
+7. [License](#License)
 
 ## Install
+[Back to Content](#Content)
 
 0. Clone the repo:
 ```
@@ -33,9 +35,10 @@ pip install --upgrade nvidia-tensorrt
 ````
 
 ## Convertation
-**CURRENTLY IN DEV MODE**
+[Back to Content](#Content)
 
 ### ONNX Convertation
+[Back to Content](#Content)
 #### Predefined models
 1. Run:
 ```
@@ -72,7 +75,6 @@ python opti_models/convertations/cvt_onnx.py --model-name resnet18
 python opti_models/convertations/cvt_onnx.py --model-name resnet18 --model-path CKPT-PATH --batch_size 1 --size 224 224 --num-classes 1
 ```
 
-
 #### Entirely custom model
 
 The script for convertation is `cvt_onxx.py`. In order to convert something entirely custom, you need to use python api and 
@@ -90,7 +92,7 @@ simply are not supported by either ONNX or TRT.
 
 
 ### TensorRT Convertation
-
+[Back to Content](#Content)
 1. Run:
 ```
 python opti_models/convertations/cvt_tensorrt.py --onnx-path 
@@ -110,12 +112,13 @@ python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx_export/re
 ```
 
 ## Models
+[Back to Content](#Content)
+
 For list of all models see [MODELS.md](/opti_models/models/MODELS.md)
 
 ## Benchmarks
-
+[Back to Content](#Content)
 ### Imagenet
-
 ### 1. Prepare data
 For all imagenet benchmarks you need to prepare data:
 1. Download data from [GoogleDrive](https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing)
@@ -126,7 +129,7 @@ sudo mv imagenetv2-topimages.tar /usr/local/opti_models/
 sudo tar -xvf imagenetv2-topimages.tar
 ```
 
-#### 2. Run imagenet Benchmark with pyTorch models
+### 2. Run imagenet Benchmark with pyTorch models
 ```
 python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name MODEL-NAME
 ```
@@ -137,7 +140,7 @@ Parameters cheatsheet:
 - `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
 - `workers` (int, optional) - Number of the workers. Default: `1`
 
-#### 2. Run imagenet Benchmark with TensorRT models
+### 3. Run imagenet Benchmark with TensorRT models
 ```
 python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path TRT-PATH
 ```
@@ -147,6 +150,7 @@ Parameters cheatsheet:
 - `size` (int int, optional) - Image size. Default: `224 224`.
 
 ## Simple pipeline example
+[Back to Content](#Content)
 #### Let's sum up simple end2end pipeline for convertations and benchmarking:
 1. First let's run simple pytorch speed benchmark with resnet18: 
 ```
@@ -203,3 +207,20 @@ INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
 INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
 INFO:root:      BENCHMARK FOR resnet18: SUCCESS
 ```
+
+## Citing
+[Back to Content](#Content)
+```
+@misc{Dobrynin:2021,
+  Author = {Dobrynin, Ilya and Panshin, Ivan},
+  Title = {Opti Models: Easy-Way Models Convertations},
+  Year = {2021},
+  Publisher = {GitHub},
+  Journal = {GitHub repository},
+  Howpublished = {\url{https://github.com/IlyaDobrynin/opti_models}}
+}
+```
+## License
+[Back to Content](#Content)
+
+Project is distributed under [MIT License](LICENSE)
