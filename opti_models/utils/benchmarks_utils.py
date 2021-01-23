@@ -23,6 +23,7 @@ def load_engine(trt_runtime, engine_path):
     with open(engine_path, 'rb') as f:
         engine_data = f.read()
     engine = trt_runtime.deserialize_cuda_engine(engine_data)
+    print(engine)
     return engine
 
 
@@ -51,7 +52,7 @@ def allocate_buffers(engine):
     # when using lower precision [e.g. NMS output would not be np.float32
     # anymore, even though this is assumed in binding_to_type]
     binding_to_type = {"input": np.float32, "output": np.float32}
-
+    print(engine)
     for binding in engine:
         size = trt.volume(engine.get_binding_shape(binding)) * engine.max_batch_size
         dtype = binding_to_type[str(binding)]

@@ -21,7 +21,7 @@ class ClassificationFactory(nn.Module):
             num_classes: int,
             num_input_channels: int = 3,
             num_last_filters: int = 128,
-            dropout: float = 0.5,
+            dropout: float = 0.2,
             pretrained: str = 'imagenet',
             unfreeze_encoder: bool = True,
             custom_enc_start: bool = False,

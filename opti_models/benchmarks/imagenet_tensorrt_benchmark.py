@@ -68,11 +68,10 @@ class TensorRTBenchmark:
                 bindings=self.bindings,
                 stream_handle=self.stream.handle
             )
-            avg_batch_time.append(time() - batch_time)
-
             [cuda.memcpy_dtoh_async(out.host, out.device, self.stream) for out in self.outputs]
             self.stream.synchronize()
             pred = np.asarray([out.host for out in self.outputs])
+            avg_batch_time.append(time() - batch_time)
             preds_dict.update({name: label for name, label in zip([name], pred)})
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
         return preds_dict
@@ -91,21 +90,19 @@ class TensorRTBenchmark:
 
 def parse_args():
     # Default args
-    path_to_images = "/mnt/Disk_G/DL_Data/source/imagenet/imagenetv2-topimages/imagenetv2-top-images-format-val"
-    trt_path = "../../data/trt_export/resnet18/resnet18_bs-1_res-224x224.engine"
-    in_size = (224, 224)
+    path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
 
-    parser = ArgumentParser()
-    parser.add_argument('--path_to_images', default=path_to_images, type=str)
-    parser.add_argument('--trt_path', default=trt_path, type=str)
-    parser.add_argument('--in_size', default=in_size, nargs='+', type=int)
+    parser = ArgumentParser(description='Simple speed benchmark, based on TRT models')
+    parser.add_argument('--trt-path', type=str, required=True, help="Path to TRT model")
+    parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
+    parser.add_argument('--size', default=(224, 224), nargs='+', type=int, help="Input shape, default=(224, 224)")
     return parser.parse_args()
 
 
 def main(args):
     bench_obj = TensorRTBenchmark(
         trt_path=args.trt_path,
-        in_size=args.in_size
+        in_size=args.size
     )
     bench_obj.process(path_to_images=args.path_to_images)
 
