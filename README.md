@@ -4,11 +4,11 @@ Repo for the easy-way models convertation.
 ## Content
 1. [Install](#Install)
 2. [Convertation](#Convertation)
-    - [ONNX](#ONNX Convertation)
-    - [TensorRT](TensorRT Convertation)
+    - [ONNX](#ONNX-Convertation)
+    - [TensorRT](TensorRT-Convertation)
 3. [Models](#Models)
 4. [Benchmarks](#Benchmarks)
-5. [Simple pipeline example](#Simple pipeline example)
+5. [Simple pipeline example](#Simple-pipeline-example)
 
 
 ## Install
