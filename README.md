@@ -54,8 +54,8 @@ Parameters cheatsheet:
   - `custom` - your own torchvision models.    
 - `model-path` (str, optional) - Path to the model. Default: `ImageNet` - model with imagenet pretrain.
 - `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
-- `size` (int int int, optional) - Image size. Default: `224 224 3`.
-- `num-classes` (int, optional) - Num classes in the head for backbone model.  Default: `1000`.
+- `size` (int int int, optional) - Image size `[Ch x H x W]`. Default: `3 224 224`.
+- `num-classes` (int, optional) - Num classes in the head for backbone model. Default: `1000`.
 - `export-dir` (str, optional) - Directory to export onnx converted files. Default: `data/onnx-export`.
 
 If you're converting your own model with custom `num-classes`, opti_models simply changes the last FC layer of the network,
@@ -101,7 +101,6 @@ python opti_models/convertations/cvt_tensorrt.py --onnx-path
 Parameters cheatsheet:
 
 - `onnx-path` (str, required) - Path to the exported onnx model.
-- `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
 - `precision` (str, optional) - Precision of the TRT engine, 32 (for FP32) or 16 (for FP16). Default: `32`.
 - `export-dir` (str, optional) - Directory to export TRT engine . Default: `data/trt-export`.
 
@@ -147,7 +146,6 @@ python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path TRT-PATH
 Parameters cheatsheet:
 - `trt-path` (str, required) - path to the TensorRT model.
 - `path-to-images` (str, required) - path to the validation set. Default - `/usr/local/opti_models/imagenetv2-top-images-format-val`.
-- `size` (int int, optional) - Image size. Default: `224 224`.
 
 ## Simple pipeline example
 [Back to Content](#Content)
@@ -197,7 +195,7 @@ INFO:root:      Convert to TensorRT: SUCCESS
 ```
 4. Last step - let's see the TRT model performance on the same data as in step 1:
 ```
-python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_bs-1_res-224x224.engine
+python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_bs-1_res-3x224x224.engine
 
 Output:
 INFO:root:      TENSORRT BENCHMARK FOR resnet18: START

@@ -1,4 +1,5 @@
 import os
+import onnx
 import typing as t
 import tensorrt as trt
 import argparse
@@ -64,23 +65,35 @@ def run_checks(precision: str, onnx_model_path: str):
     return trt_datatype
 
 
+def get_input_shape(model_path: str) -> t.Tuple:
+    model = onnx.load(model_path)
+    layer = model.graph.input[0]
+    tensor_type = layer.type.tensor_type
+    size = []
+    if (tensor_type.HasField("shape")):
+        for d in tensor_type.shape.dim:
+            if (d.HasField("dim_value")):
+                size.append(d.dim_value)
+    return tuple(size)
+
+
 def make_trt_convertation(
         precision: str,
         export_dir: str,
         onnx_model_path: str,
-        batch_size: int,
-        size: t.Tuple,
         verbose: bool = True
     ):
 
     if verbose:
         logging.info("\tConvert to TensorRT: START")
 
+    bs, c, h, w = get_input_shape(model_path=onnx_model_path)
+
     model_name = onnx_model_path.split("/")[-2]
     export_dir = os.path.join(export_dir, model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-    out_model_name = f"{model_name}_bs-{batch_size}_res-{size[0]}x{size[0]}.engine"
+    out_model_name = f"{model_name}_bs-{bs}_res-{c}x{h}x{w}.engine"
     export_path = os.path.join(export_dir, out_model_name)
 
     trt_datatype = run_checks(precision, onnx_model_path)
@@ -92,21 +105,22 @@ def make_trt_convertation(
         # Display requested engine settings to stdout
         logging.info(f"\t{sub_prefix}TensorRT inference engine settings:")
         logging.info(f"\t{sub_prefix}  * Inference precision - {trt_datatype}")
-        logging.info(f"\t{sub_prefix}  * Max batch size - {batch_size}")
+        logging.info(f"\t{sub_prefix}  * Max batch size - {bs}")
 
     # This function uses supplied .uff file
     # alongside with UffParser to build TensorRT
-    # engine. For more details, check implmentation
+    # engine. For more details, check implementation
     try:
         trt_engine = build_engine(
             uff_model_path=onnx_model_path,
             trt_logger=TRT_LOGGER,
             trt_engine_datatype=trt_datatype,
-            batch_size=batch_size,
+            batch_size=bs,
             verbose=verbose
         )
-    except:
-        print('TensorRT engine build: FAIL')
+    except Exception as e:
+        logging.info("\tTensorRT engine build: FAIL")
+        raise e
     else:
         if verbose:
             logging.info(f"\t{sub_prefix}TensorRT engine build: SUCCESS")
@@ -124,8 +138,6 @@ def make_trt_convertation(
 
 def main(args):
     onnx_model_path = args.onnx_path
-    batch_size = args.batch_size
-    size = args.size
     precision = args.precision
     export_dir = args.export_dir
     verbose = args.verbose
@@ -134,18 +146,14 @@ def main(args):
         precision=precision,
         export_dir=export_dir,
         onnx_model_path=onnx_model_path,
-        batch_size=batch_size,
-        size=size,
         verbose=verbose
     )
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='TRT params')
-    parser.add_argument('--onnx-path', type=str)
+    parser.add_argument('--onnx-path', type=str, required=True)
     parser.add_argument('--export-dir', default='data/trt-export', type=str)
-    parser.add_argument('--batch-size', default=1, type=int)
-    parser.add_argument('--size', nargs="+", default=(224,224), type=int)
     parser.add_argument('--precision', default="32", type=str)
     parser.add_argument('--verbose', type=bool, default=True)
 

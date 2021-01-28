@@ -10,74 +10,82 @@ import pycuda.driver as cuda
 from argparse import ArgumentParser
 from albumentations import Compose, Resize, Normalize
 import cv2
-from opti_models.utils.benchmarks_utils import compute_metrics, prepare_data, load_engine, allocate_buffers
+from opti_models.utils.benchmarks_utils import compute_metrics, prepare_data, load_engine, allocate_buffers, get_shapes
 
 logging.basicConfig(level=logging.INFO)
 TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 
 
 class TensorRTBenchmark:
-    def __init__(
-            self,
-            trt_path: str,
-            in_size: t.Tuple = (224, 224)
-    ):
-        self.model_width = in_size[1]
-        self.model_height = in_size[0]
-        self.trt_runtime = trt.Runtime(TRT_LOGGER)
-        self.trt_engine = load_engine(
-            trt_runtime=self.trt_runtime,
-            engine_path=trt_path
-        )
+    def __init__(self, trt_path: str):
         self.model_name = trt_path.split("/")[-2]
-        self.inputs, self.outputs, self.bindings, self.stream = allocate_buffers(self.trt_engine)
+
+        self.trt_runtime = trt.Runtime(TRT_LOGGER)
+        self.trt_engine = load_engine(trt_runtime=self.trt_runtime, engine_path=trt_path)
         self.context = self.trt_engine.create_execution_context()
-        input_volume = trt.volume((3, self.model_width, self.model_height))
-        self.numpy_array = np.zeros((self.trt_engine.max_batch_size, input_volume))
-        self.in_size = in_size
-        self.batch_size = 1
+        self.inputs, self.outputs, self.bindings, self.stream = allocate_buffers(self.trt_engine)
+
+        bs, c, h, w = self.context.get_binding_shape(binding=0)
+        self.max_batch_size = self.trt_engine.max_batch_size
+        shapes = get_shapes(engine=self.trt_engine)
+        self.num_classes = shapes[-1] // self.max_batch_size
+        input_volume = trt.volume((c, w, h))
+        self.numpy_array = np.zeros((self.max_batch_size, input_volume))
+        self.batch_size = bs
 
         self.augmentations = Compose([
             Resize(
-                height=in_size[0],
-                width=in_size[1],
+                height=h,
+                width=w,
                 interpolation=cv2.INTER_AREA
             ),
-            Normalize(
-                mean=(0.485, 0.456, 0.406),
-                std=(0.229, 0.224, 0.225)
-            ),
+            Normalize(),
         ], p=1)
+
+    def _load_images(self, labels_df: pd.DataFrame, idx: int):
+        idx_start = idx
+        idx_stop = min(idx + self.max_batch_size, labels_df.shape[0])
+        bs = idx_stop - idx_start
+        batch_df = labels_df.iloc[idx_start: idx_stop, :]
+        images = np.asarray([
+            np.array(
+                self.augmentations(image=cv2.cvtColor(cv2.imread(name), cv2.COLOR_BGR2RGB))['image'],
+                dtype=np.float32,
+                order='C'
+            ).transpose((2, 0, 1)).ravel() for name in batch_df['names'].values
+        ])
+        names = [name for name in batch_df['names'].values]
+        return images, names, bs
 
     def _inference_loop(self, labels_df: pd.DataFrame):
         preds_dict = {}
         avg_batch_time = []
-        for idx, row in tqdm(labels_df.iterrows(), total=labels_df.shape[0]):
-            name = row["names"]
-            image = cv2.cvtColor(cv2.imread(name), cv2.COLOR_BGR2RGB)
+        for idx in tqdm(range(0, labels_df.shape[0], self.max_batch_size)):
+            image_batch, names, bs = self._load_images(labels_df=labels_df, idx=idx)
 
-            input_data = self.augmentations(image=image)["image"]
-            input_data = np.array(input_data, dtype=np.float32, order='C')
-            input_data = input_data.transpose((2, 0, 1))
-            np.copyto(self.inputs[0].host, input_data.ravel())
-            [cuda.memcpy_htod_async(inp.device, inp.host, self.stream) for inp in self.inputs]
+            # TODO: remove this hack
+            if bs != self.max_batch_size:
+                continue
 
             batch_time = time()
+            np.copyto(self.inputs[0].host, image_batch.ravel())
+            [cuda.memcpy_htod_async(inp.device, inp.host, self.stream) for inp in self.inputs]
             self.context.execute_async(
-                batch_size=self.batch_size,
+                batch_size=bs,
                 bindings=self.bindings,
                 stream_handle=self.stream.handle
             )
             [cuda.memcpy_dtoh_async(out.host, out.device, self.stream) for out in self.outputs]
             self.stream.synchronize()
-            pred = np.asarray([out.host for out in self.outputs])
+            preds = [out.host for out in self.outputs][0]
+            preds = np.asarray([preds[i: i + self.num_classes] for i in range(0, len(preds), self.num_classes)])
             avg_batch_time.append(time() - batch_time)
-            preds_dict.update({name: label for name, label in zip([name], pred)})
+            preds_dict.update({name: label for name, label in zip(names, preds)})
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
         return preds_dict
 
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
-        labels_df = prepare_data(path_to_images=path_to_images)
+        labels_df = prepare_data(path_to_images=path_to_images)  #.iloc[:999, :]
 
         logging.info(f"\tTENSORRT BENCHMARK FOR {self.model_name}: START")
         preds_dict = self._inference_loop(labels_df=labels_df)
@@ -95,15 +103,11 @@ def parse_args():
     parser = ArgumentParser(description='Simple speed benchmark, based on TRT models')
     parser.add_argument('--trt-path', type=str, required=True, help="Path to TRT model")
     parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
-    parser.add_argument('--size', default=(224, 224), nargs='+', type=int, help="Input shape, default=(224, 224)")
     return parser.parse_args()
 
 
 def main(args):
-    bench_obj = TensorRTBenchmark(
-        trt_path=args.trt_path,
-        in_size=args.size
-    )
+    bench_obj = TensorRTBenchmark(trt_path=args.trt_path)
     bench_obj.process(path_to_images=args.path_to_images)
 
 

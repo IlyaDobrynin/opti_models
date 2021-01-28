@@ -73,8 +73,9 @@ def make_onnx_convertation(
             opset_version=11,
             export_params=True,
         )
-    except:
-        print('Convert to ONNX: FAIL')
+    except Exception as e:
+        logging.info("\tConvert to ONNX: FAIL")
+        raise e
     else:
         if verbose:
             logging.info("\tConvert to ONNX: SUCCESS")
@@ -82,8 +83,9 @@ def make_onnx_convertation(
     try:
         onnx_model = onnx.load(export_path)
         onnx.checker.check_model(onnx_model)
-    except:
-        print('ONNX check: FAIL')
+    except Exception as e:
+        logging.info("\tConvert to ONNX: FAIL")
+        raise e
     else:
         if verbose:
             logging.info("\tONNX check: SUCCESS")
@@ -104,7 +106,7 @@ def make_onnx_convertation(
         ort_session = ort.InferenceSession(export_simple_path)
         outputs = ort_session.run(None, {"input": dummy_input.cpu().numpy()})
     except:
-        print('Can\'t start onnxruntime session')
+        logging.info("\tCan\'t start onnxruntime session")
 
     if outputs[0].shape != dummy_output.shape:
         if os.path.exists(export_path):
@@ -146,8 +148,8 @@ def parse_args():
     parser.add_argument('--model-type', default='backbone', type=str, help="Type of the model")
     parser.add_argument('--model-path', type=str, default='ImageNet', help="Path to the pretrained weights, or ImageNet,"
                                                                      "if you want to get model with imagenet pretrain")
-    parser.add_argument('--export-dir', default='data/onnx-export', help="Path to directory to save results")
-    parser.add_argument('--batch-size', default=1, help="Batch size for optimized model")
+    parser.add_argument('--export-dir', type=str, default='data/onnx-export', help="Path to directory to save results")
+    parser.add_argument('--batch-size', type=int, default=1, help="Batch size for optimized model")
     parser.add_argument('--size', nargs='+', default=(3, 224, 224), type=int, help="Size of the input tensor")
     parser.add_argument('--num-classes', default=1000, type=int, help="Number of output classes of the model")
     parser.add_argument('--verbose', default=True, type=bool, help="Flag for showing information")

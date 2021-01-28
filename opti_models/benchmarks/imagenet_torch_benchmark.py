@@ -19,8 +19,8 @@ class SimpleBenchmark:
             self,
             model_name: str,
             batch_size: t.Optional[int] = 1,
+            in_size: t.Tuple = (224, 224),
             workers: t.Optional[int] = 1,
-            in_size: t.Optional[t.Tuple] = (224, 224),
             show_model_info: bool = False
     ):
         self.model_name = model_name
@@ -50,9 +50,9 @@ class SimpleBenchmark:
 
             batch_time = time()
             preds = model(inputs)
+            preds = F.softmax(preds, dim=-1).data.cpu().numpy()
             avg_batch_time.append(time() - batch_time)
 
-            preds = F.softmax(preds, dim=-1).data.cpu().numpy()
             preds_dict.update({name: label for name, label in zip(names, preds)})
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
         return preds_dict

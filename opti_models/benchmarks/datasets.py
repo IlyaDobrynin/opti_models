@@ -24,10 +24,7 @@ class ImagenetDataset(Dataset):
                 width=in_size[1],
                 interpolation=cv2.INTER_AREA
             ),
-            Normalize(
-                mean=(0.485, 0.456, 0.406),
-                std=(0.229, 0.224, 0.225)
-            ),
+            Normalize(),
             ToTensorV2(),
         ], p=1)
 
