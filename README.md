@@ -48,9 +48,9 @@ python opti_models/convertations/cvt_onnx.py --model-name BACKBONE_NAME
 Parameters cheatsheet:
 
 - `model-name` (str, required) - Name of the model.
-- `model-type` (str, optional) - Type of the model. Default: `backbone`. Options:
-  - `backbone` - simply backbone classification model
-  - `classifier` - opti-models classification model
+- `model-type` (str, optional) - Type of the model. Default: `classifier`. Options:
+  - `classifier` - simply backbone classification model
+  - `opti-classifier` - opti-models classification model
   - `custom` - your own torchvision models.    
 - `model-path` (str, optional) - Path to the model. Default: `ImageNet` - model with imagenet pretrain.
 - `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
@@ -72,7 +72,7 @@ python opti_models/convertations/cvt_onnx.py --model-name resnet18
 
 # Convert you own ResNet18 torchvision model with batch size 1, 
 # image size 224x224, num classes 1 and custom weights
-python opti_models/convertations/cvt_onnx.py --model-name resnet18 --model-path CKPT-PATH --batch_size 1 --size 224 224 --num-classes 1
+python opti_models/convertations/cvt_onnx.py --model-name resnet18 --model-path CKPT-PATH --batch_size 1 --size 3 224 224 --num-classes 1
 ```
 
 #### Entirely custom model

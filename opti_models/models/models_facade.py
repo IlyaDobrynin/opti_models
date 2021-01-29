@@ -16,15 +16,16 @@ class ModelFacade:
         Arguments:
             task:           Task for the model:
                                 - classification
-                                - segmentation
+                                - opti-classification
                                 - detection
+                                - ocr
             model_name:     Name of the architecture for the given task. See in documentation.
 
     """
 
     _models_dict = {
-        "backbones": BACKBONES,
-        "classification": {
+        "classification": BACKBONES,
+        "opti-classification": {
             "basic_classifier": ClassificationFactory,
         },
         # "segmentation": {

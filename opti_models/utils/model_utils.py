@@ -39,12 +39,12 @@ def get_model(
         classifier_params: t.Optional[t.Dict] = None,
         show: bool = False
 ) -> torch.nn.Module:
-    if model_type == 'backbone':
+    if model_type == 'classifier':
         if model_path.lower() == 'imagenet':
             pretrained = True
         else:
             pretrained = False
-        m_facade = models_facade.ModelFacade(task='backbones')
+        m_facade = models_facade.ModelFacade(task='classification')
         parameters = dict(requires_grad=True, pretrained=pretrained)
         model = m_facade.get_model_class(model_definition=model_name)(**parameters)
 
@@ -52,8 +52,8 @@ def get_model(
         if num_classes is not None and num_classes != 1000:
             _patch_last_linear(model=model, num_classes=num_classes)
 
-    elif model_type == 'classifier':
-        m_facade = models_facade.ModelFacade(task='classification')
+    elif model_type == 'opti-classifier':
+        m_facade = models_facade.ModelFacade(task='opti-classification')
         if model_path.lower() == 'imagenet':
             pretrained = model_path.lower()
         else:

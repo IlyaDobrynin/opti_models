@@ -60,7 +60,7 @@ class SimpleBenchmark:
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
         labels_df = prepare_data(path_to_images=path_to_images)
         model = get_model(
-            model_type='backbone',
+            model_type='classifier',
             model_name=self.model_name,
             model_path='ImageNet',
             show=self.show_model_info

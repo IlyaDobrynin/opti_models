@@ -145,7 +145,7 @@ def main(args):
 def parse_args():
     parser = argparse.ArgumentParser(description='ONNX conversion script')
     parser.add_argument('--model-name', type=str, help="Name of the model", required=True)
-    parser.add_argument('--model-type', default='backbone', type=str, help="Type of the model")
+    parser.add_argument('--model-type', default='classifier', type=str, help="Type of the model")
     parser.add_argument('--model-path', type=str, default='ImageNet', help="Path to the pretrained weights, or ImageNet,"
                                                                      "if you want to get model with imagenet pretrain")
     parser.add_argument('--export-dir', type=str, default='data/onnx-export', help="Path to directory to save results")
