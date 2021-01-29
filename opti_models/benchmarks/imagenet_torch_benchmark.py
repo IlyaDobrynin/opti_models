@@ -100,36 +100,21 @@ def main(args):
 
 
 def bench_all():
-    model_names = [
-        "resnet50",
-        "resnet34",
-        "resnet18",
-        "mobilenetv2_w1",
-        "mobilenetv2_wd2",
-        "mobilenetv2_wd4",
-        "mobilenetv2_w3d4",
-        "mobilenetv3_large_w1",
-        "mixnet_s",
-        "mixnet_m",
-        "mixnet_l",
-        'efficientnet_b0',
-        'efficientnet_b1',
-        'genet_small',
-        'genet_normal',
-        'genet_large'
-    ]
-
+    from opti_models.models.backbones.backbone_factory import show_available_backbones
+    model_names = show_available_backbones()
     for model_name in model_names:
         args = parse_args()
         args.model_name = model_name
         if model_name == "genet_large":
             args.in_size = (256, 256)
+        elif model_name == 'inception_v3':
+            args.in_size = (299, 299)
         main(args=args)
         logging.info(f"-" * 100)
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    main(args)
+    # args = parse_args()
+    # main(args)
 
-    # bench_all()
+    bench_all()

@@ -161,32 +161,15 @@ def parse_args():
 
 
 def cvt_all():
-    model_names = [
-        "resnet50",
-        "resnet34",
-        "resnet18",
-        "mobilenetv2_w1",
-        "mobilenetv2_wd2",
-        "mobilenetv2_wd4",
-        "mobilenetv2_w3d4",
-        "mobilenetv3_large_w1",
-        "mixnet_s",
-        "mixnet_m",
-        "mixnet_l",
-        'efficientnet_b0',
-        'efficientnet_b1',
-        'genet_small',
-        'genet_normal',
-        'genet_large'
-    ]
-
-    onnx_models = "data/onnx_export"
+    from opti_models.models.backbones.backbone_factory import show_available_backbones
+    trt_export_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/trt-export"
+    model_names = [name for name in show_available_backbones() if name not in os.listdir(trt_export_path)]
+    onnx_models = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/onnx-export"
     for name in model_names:
-        logging.info(f"{name.upper()} CONVERT")
+        logging.info(f"\t{name.upper()} CONVERT")
         onnx_model_folder = os.path.join(onnx_models, name)
         onnx_model_name = [f for f in os.listdir(onnx_model_folder) if f.endswith("_simplified.onnx")][0]
         onnx_model_path = os.path.join(onnx_model_folder, onnx_model_name)
-
         args = parse_args()
         args.onnx_path = onnx_model_path
         main(args=args)

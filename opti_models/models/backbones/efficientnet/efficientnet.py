@@ -678,7 +678,7 @@ def efficientnet_b0b(in_size=(224, 224), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b0b",
+    net = get_efficientnet(version="b0", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b0b",
                            **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -699,7 +699,7 @@ def efficientnet_b1b(in_size=(240, 240), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b1b",
+    net = get_efficientnet(version="b1", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b1b",
                            **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -720,7 +720,7 @@ def efficientnet_b2b(in_size=(260, 260), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b2b",
+    net = get_efficientnet(version="b2", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b2b",
                            **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -741,7 +741,7 @@ def efficientnet_b3b(in_size=(300, 300), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b3b",
+    net = get_efficientnet(version="b3", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b3b",
                            **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -762,14 +762,8 @@ def efficientnet_b4b(in_size=(380, 380), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(
-        version="b4",
-        in_size=in_size,
-        tf_mode=True,
-        bn_eps=1e-3,
-        model_name="efficientnet_b4b",
-        **kwargs
-    )
+    net = get_efficientnet(version="b4", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b4b",
+                           **kwargs)
 
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -790,7 +784,7 @@ def efficientnet_b5b(in_size=(456, 456), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5b",
+    net = get_efficientnet(version="b5", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b5b",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -812,7 +806,7 @@ def efficientnet_b6b(in_size=(528, 528), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net =  get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6b",
+    net =  get_efficientnet(version="b6", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b6b",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -834,7 +828,7 @@ def efficientnet_b7b(in_size=(600, 600), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7b",
+    net = get_efficientnet(version="b7", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b7b",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -856,7 +850,7 @@ def efficientnet_b0c(in_size=(224, 224), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b0c",
+    net = get_efficientnet(version="b0", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b0c",
                             **kwargs)
 
     for params in net.parameters():
@@ -878,7 +872,7 @@ def efficientnet_b1c(in_size=(240, 240), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b1c",
+    net = get_efficientnet(version="b1", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b1c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -898,7 +892,7 @@ def efficientnet_b2c(in_size=(260, 260), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b2c",
+    net = get_efficientnet(version="b2", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b2c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -918,7 +912,7 @@ def efficientnet_b3c(in_size=(300, 300), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b3c",
+    net = get_efficientnet(version="b3", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b3c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -938,7 +932,7 @@ def efficientnet_b4c(in_size=(380, 380), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b4c",
+    net = get_efficientnet(version="b4", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b4c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -958,7 +952,7 @@ def efficientnet_b5c(in_size=(456, 456), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5c",
+    net = get_efficientnet(version="b5", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b5c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -979,7 +973,7 @@ def efficientnet_b6c(in_size=(528, 528), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6c",
+    net = get_efficientnet(version="b6", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b6c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -1000,7 +994,7 @@ def efficientnet_b7c(in_size=(600, 600), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7c",
+    net = get_efficientnet(version="b7", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b7c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad
@@ -1021,7 +1015,7 @@ def efficientnet_b8c(in_size=(672, 672), requires_grad=True, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    net = get_efficientnet(version="b8", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b8c",
+    net = get_efficientnet(version="b8", in_size=in_size, tf_mode=False, bn_eps=1e-3, model_name="efficientnet_b8c",
                             **kwargs)
     for params in net.parameters():
         params.requires_grad = requires_grad

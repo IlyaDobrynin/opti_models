@@ -10,8 +10,6 @@ from . import (
     inception_v3,
     resnext50_32x4d, resnext101_32x8d,
     wide_resnet50_2, wide_resnet101_2,
-    mobilenet_v2,
-
     mobilenetv2_w1, mobilenetv2_wd2, mobilenetv2_wd4, mobilenetv2_w3d4,
     mobilenetv3_large_w1,
     mixnet_s, mixnet_m, mixnet_l,
@@ -26,12 +24,11 @@ from . import (
 
 BACKBONES = {
     # Torchvision models
-    "resnet152": resnet152,
-    "resnet101": resnet101,
-    "resnet50": resnet50,
-    "resnet34": resnet34,
-    "resnet18": resnet18,
-    'mobilenet_v2': mobilenet_v2,
+    'resnet152': resnet152,
+    'resnet101': resnet101,
+    'resnet50': resnet50,
+    'resnet34': resnet34,
+    'resnet18': resnet18,
     'vgg11': vgg11,
     'vgg11_bn': vgg11_bn,
     'vgg13': vgg13,
@@ -51,21 +48,20 @@ BACKBONES = {
     'wide_resnet101': wide_resnet101_2,
 
     # Mobilenets
-    "mobilenetv2_w1": mobilenetv2_w1,
-    "mobilenetv2_wd2": mobilenetv2_wd2,
-    "mobilenetv2_wd4": mobilenetv2_wd4,
-    "mobilenetv2_w3d4": mobilenetv2_w3d4,
-    "mobilenetv3_large_w1": mobilenetv3_large_w1,
+    'mobilenetv2_w1': mobilenetv2_w1,
+    'mobilenetv2_wd2': mobilenetv2_wd2,
+    'mobilenetv2_wd4': mobilenetv2_wd4,
+    'mobilenetv2_w3d4': mobilenetv2_w3d4,
+    'mobilenetv3_large_w1': mobilenetv3_large_w1,
 
     # MixNet
-    "mixnet_s": mixnet_s,
-    "mixnet_m": mixnet_m,
-    "mixnet_l": mixnet_l,
+    'mixnet_s': mixnet_s,
+    'mixnet_m': mixnet_m,
+    'mixnet_l': mixnet_l,
 
     # Efficientnets
     'efficientnet_b0': efficientnet_b0,
     'efficientnet_b1': efficientnet_b1,
-
     'efficientnet_b0b': efficientnet_b0b,
     'efficientnet_b1b': efficientnet_b1b,
     'efficientnet_b2b': efficientnet_b2b,
@@ -74,7 +70,6 @@ BACKBONES = {
     'efficientnet_b5b': efficientnet_b5b,
     'efficientnet_b6b': efficientnet_b6b,
     'efficientnet_b7b': efficientnet_b7b,
-
     'efficientnet_b0c': efficientnet_b0c,
     'efficientnet_b1c': efficientnet_b1c,
     'efficientnet_b2c': efficientnet_b2c,
@@ -85,10 +80,10 @@ BACKBONES = {
     'efficientnet_b7c': efficientnet_b7c,
     'efficientnet_b8c': efficientnet_b8c,
 
+    # Genets
     'genet_small': genet_small,
     'genet_normal': genet_normal,
     'genet_large': genet_large,
-
 }
 
 

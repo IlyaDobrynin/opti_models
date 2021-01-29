@@ -158,27 +158,11 @@ def parse_args():
 
 
 def cvt_all():
-    model_names = [
-        "resnet50",
-        "resnet34",
-        "resnet18",
-        "mobilenetv2_w1",
-        "mobilenetv2_wd2",
-        "mobilenetv2_wd4",
-        "mobilenetv2_w3d4",
-        "mobilenetv3_large_w1",
-        "mixnet_s",
-        "mixnet_m",
-        "mixnet_l",
-        'efficientnet_b0',
-        'efficientnet_b1',
-        'genet_small',
-        'genet_normal',
-        'genet_large'
-    ]
-
+    from opti_models.models.backbones.backbone_factory import show_available_backbones
+    onnx_export_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/onnx-export"
+    model_names = [name for name in show_available_backbones() if name not in os.listdir(onnx_export_path)]
     for name in model_names:
-        logging.info(f"{name.upper()} CONVERT")
+        logging.info(f"\t{name.upper()} CONVERT")
         args = parse_args()
         args.model_name = name
         main(args=args)
@@ -188,3 +172,4 @@ def cvt_all():
 if __name__ == '__main__':
     args = parse_args()
     main(args=args)
+    # cvt_all()

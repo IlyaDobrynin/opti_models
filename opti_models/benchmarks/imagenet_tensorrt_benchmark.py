@@ -85,7 +85,7 @@ class TensorRTBenchmark:
         return preds_dict
 
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
-        labels_df = prepare_data(path_to_images=path_to_images)  #.iloc[:999, :]
+        labels_df = prepare_data(path_to_images=path_to_images)
 
         logging.info(f"\tTENSORRT BENCHMARK FOR {self.model_name}: START")
         preds_dict = self._inference_loop(labels_df=labels_df)
@@ -99,9 +99,8 @@ class TensorRTBenchmark:
 def parse_args():
     # Default args
     path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
-
     parser = ArgumentParser(description='Simple speed benchmark, based on TRT models')
-    parser.add_argument('--trt-path', type=str, required=True, help="Path to TRT model")
+    parser.add_argument('--trt-path', type=str, help="Path to TRT model", required=True)
     parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
     return parser.parse_args()
 
@@ -112,26 +111,9 @@ def main(args):
 
 
 def bench_all():
-    model_names = [
-        "resnet50",
-        "resnet34",
-        "resnet18",
-        "mobilenetv2_w1",
-        "mobilenetv2_wd2",
-        "mobilenetv2_wd4",
-        "mobilenetv2_w3d4",
-        "mobilenetv3_large_w1",
-        "mixnet_s",
-        "mixnet_m",
-        "mixnet_l",
-        'efficientnet_b0',
-        'efficientnet_b1',
-        'genet_small',
-        'genet_normal',
-        'genet_large'
-    ]
-    trt_models_path = "../../data/trt_export"
-
+    from opti_models.models.backbones.backbone_factory import show_available_backbones
+    model_names = show_available_backbones()
+    trt_models_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/trt-export"
     for name in model_names:
         trt_model_path = os.path.join(trt_models_path, name)
         trt_model_name = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")][0]
