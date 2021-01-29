@@ -39,7 +39,8 @@ def bench_all():
         'efficientnet_b8c',
     ]
     model_names = [name for name in show_available_backbones() if name not in excluded_names]
-    for model_name in model_names:
+    for i, model_name in enumerate(model_names):
+        logging.info(f"\t{i}/{len(model_names)}")
         args = parse_args()
         args.model_name = model_name
         if model_name == "genet_large":

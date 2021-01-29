@@ -36,8 +36,9 @@ def bench_all():
     ]
     model_names = [name for name in show_available_backbones() if name not in excluded_names]
     trt_models_path = "data/trt-export"
-    for name in model_names:
-        trt_model_path = os.path.join(trt_models_path, name)
+    for i, model_name in enumerate(model_names):
+        logging.info(f"\t{i}/{len(model_names)}")
+        trt_model_path = os.path.join(trt_models_path, model_name)
         trt_model_names = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")]
         for trt_model_name in trt_model_names:
             precision = trt_model_name.split("_")[1].split("-")[1]

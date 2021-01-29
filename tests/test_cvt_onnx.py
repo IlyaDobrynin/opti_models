@@ -23,8 +23,8 @@ def parse_args():
 def cvt_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
     model_names = [name for name in show_available_backbones()]
-    for model_name in model_names:
-        logging.info(f"\t{model_name.upper()} CONVERT")
+    for i, model_name in enumerate(model_names):
+        logging.info(f"\t{i}/{len(model_names)} - {model_name.upper()} CONVERT")
         args = parse_args()
         args.model_name = model_name
         if model_name == "genet_large":

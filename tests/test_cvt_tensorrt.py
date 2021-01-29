@@ -20,12 +20,12 @@ def cvt_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
     model_names = [name for name in show_available_backbones()]
     onnx_models = "data/onnx-export"
-    for name in model_names:
-        logging.info(f"\t{name.upper()} CONVERT")
+    for i, model_name in enumerate(model_names):
+        logging.info(f"\t{i}/{len(model_names)} - {model_name.upper()} CONVERT")
         precisions = ['32', '16']
         for precision in precisions:
             logging.info(f"\tPRECISION: {precision} -------------")
-            onnx_model_folder = os.path.join(onnx_models, name)
+            onnx_model_folder = os.path.join(onnx_models, model_name)
             onnx_model_name = [f for f in os.listdir(onnx_model_folder) if f.endswith("_simplified.onnx")][0]
             onnx_model_path = os.path.join(onnx_model_folder, onnx_model_name)
             args = parse_args()
