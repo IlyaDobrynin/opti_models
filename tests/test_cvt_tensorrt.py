@@ -21,7 +21,7 @@ def cvt_all():
     model_names = [name for name in show_available_backbones()]
     onnx_models = "data/onnx-export"
     for i, model_name in enumerate(model_names):
-        logging.info(f"\t{i}/{len(model_names)} - {model_name.upper()} CONVERT")
+        logging.info(f"\t{i + 1}/{len(model_names)} - {model_name.upper()} CONVERT")
         precisions = ['32', '16']
         for precision in precisions:
             logging.info(f"\tPRECISION: {precision} -------------")

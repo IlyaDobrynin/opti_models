@@ -40,7 +40,7 @@ def bench_all():
     ]
     model_names = [name for name in show_available_backbones() if name not in excluded_names]
     for i, model_name in enumerate(model_names):
-        logging.info(f"\t{i}/{len(model_names)}")
+        logging.info(f"\t{i + 1}/{len(model_names)}")
         args = parse_args()
         args.model_name = model_name
         if model_name == "genet_large":
