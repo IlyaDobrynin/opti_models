@@ -93,7 +93,7 @@ def make_trt_convertation(
     export_dir = os.path.join(export_dir, model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-    out_model_name = f"{model_name}_bs-{bs}_res-{c}x{h}x{w}.engine"
+    out_model_name = f"{model_name}_prec-{precision}_bs-{bs}_res-{c}x{h}x{w}.engine"
     export_path = os.path.join(export_dir, out_model_name)
 
     trt_datatype = run_checks(precision, onnx_model_path)
@@ -158,22 +158,6 @@ def parse_args():
     parser.add_argument('--verbose', type=bool, default=True)
 
     return parser.parse_args()
-
-
-def cvt_all():
-    from opti_models.models.backbones.backbone_factory import show_available_backbones
-    trt_export_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/trt-export"
-    model_names = [name for name in show_available_backbones() if name not in os.listdir(trt_export_path)]
-    onnx_models = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/onnx-export"
-    for name in model_names:
-        logging.info(f"\t{name.upper()} CONVERT")
-        onnx_model_folder = os.path.join(onnx_models, name)
-        onnx_model_name = [f for f in os.listdir(onnx_model_folder) if f.endswith("_simplified.onnx")][0]
-        onnx_model_path = os.path.join(onnx_model_folder, onnx_model_name)
-        args = parse_args()
-        args.onnx_path = onnx_model_path
-        main(args=args)
-        logging.info(f"-" * 100)
 
 
 if __name__ == '__main__':

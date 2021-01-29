@@ -89,7 +89,7 @@ def get_model(
             raise FileNotFoundError(f"No such file or directory: {model_path}")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.eval().to(device)
+    model = model.to(device)
     if show:
         summary(model, input_size=input_shape)
     return model

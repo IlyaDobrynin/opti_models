@@ -44,6 +44,7 @@ class SimpleBenchmark:
     def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module):
         preds_dict = {}
         avg_batch_time = []
+        model.eval()
         for batch in tqdm(dataloader, total=len(dataloader)):
             inputs = batch[0].cuda()
             names = batch[2]
@@ -81,7 +82,7 @@ def parse_args():
     path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
 
     parser = ArgumentParser(description='Simple speed benchmark, based on pyTorch models')
-    parser.add_argument('--model-name', type=str, help="Name of the model to test", default='resnet18')
+    parser.add_argument('--model-name', type=str, required=True, help="Name of the model to test", default='resnet18')
     parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
     parser.add_argument('--size', default=(224, 224), nargs='+', type=int, help="Input shape, default=(224, 224)")
     parser.add_argument('--batch-size', default=1, type=int, help="Size of the batch of images, default=1")
@@ -99,22 +100,6 @@ def main(args):
     bench_obj.process(path_to_images=args.path_to_images)
 
 
-def bench_all():
-    from opti_models.models.backbones.backbone_factory import show_available_backbones
-    model_names = show_available_backbones()
-    for model_name in model_names:
-        args = parse_args()
-        args.model_name = model_name
-        if model_name == "genet_large":
-            args.in_size = (256, 256)
-        elif model_name == 'inception_v3':
-            args.in_size = (299, 299)
-        main(args=args)
-        logging.info(f"-" * 100)
-
-
 if __name__ == '__main__':
-    # args = parse_args()
-    # main(args)
-
-    bench_all()
+    args = parse_args()
+    main(args)

@@ -100,7 +100,7 @@ def parse_args():
     # Default args
     path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
     parser = ArgumentParser(description='Simple speed benchmark, based on TRT models')
-    parser.add_argument('--trt-path', type=str, help="Path to TRT model", required=True)
+    parser.add_argument('--trt-path', required=True, type=str, help="Path to TRT model")
     parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
     return parser.parse_args()
 
@@ -108,20 +108,6 @@ def parse_args():
 def main(args):
     bench_obj = TensorRTBenchmark(trt_path=args.trt_path)
     bench_obj.process(path_to_images=args.path_to_images)
-
-
-def bench_all():
-    from opti_models.models.backbones.backbone_factory import show_available_backbones
-    model_names = show_available_backbones()
-    trt_models_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/trt-export"
-    for name in model_names:
-        trt_model_path = os.path.join(trt_models_path, name)
-        trt_model_name = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")][0]
-        trt_path = os.path.join(trt_model_path, trt_model_name)
-        args = parse_args()
-        args.trt_path = trt_path
-        main(args=args)
-        logging.info(f"-" * 100)
 
 
 if __name__ == '__main__':

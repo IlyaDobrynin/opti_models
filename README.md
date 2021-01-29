@@ -107,7 +107,7 @@ Parameters cheatsheet:
 **Example:**
 ```
 # Convert previously converted ResNet18 ONNX model
-python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx_export/resnet18/resnet18_bs-1_res-224x224_simplified.onnx 
+python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx_export/resnet18/resnet18_bs-1_res-3x224x224_simplified.onnx 
 ```
 
 ## Models
@@ -195,7 +195,7 @@ INFO:root:      Convert to TensorRT: SUCCESS
 ```
 4. Last step - let's see the TRT model performance on the same data as in step 1:
 ```
-python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_bs-1_res-3x224x224.engine
+python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_prec-32_bs-1_res-3x224x224.engine
 
 Output:
 INFO:root:      TENSORRT BENCHMARK FOR resnet18: START

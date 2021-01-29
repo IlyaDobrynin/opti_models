@@ -53,7 +53,7 @@ def make_onnx_convertation(
         num_classes=num_classes,
         model_path=model_path
     )
-
+    model.eval()
     dummy_input = torch.ones(input_size, device="cuda")
     with torch.no_grad():
         pre_det_res = model(dummy_input.cuda())
@@ -157,19 +157,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def cvt_all():
-    from opti_models.models.backbones.backbone_factory import show_available_backbones
-    onnx_export_path = "/mnt/Disk_F/Programming/pet_projects/opti_models/opti_models/convertations/data/onnx-export"
-    model_names = [name for name in show_available_backbones() if name not in os.listdir(onnx_export_path)]
-    for name in model_names:
-        logging.info(f"\t{name.upper()} CONVERT")
-        args = parse_args()
-        args.model_name = name
-        main(args=args)
-        logging.info(f"-" * 100)
-
-
 if __name__ == '__main__':
     args = parse_args()
     main(args=args)
-    # cvt_all()
