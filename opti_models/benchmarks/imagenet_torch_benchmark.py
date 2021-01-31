@@ -51,9 +51,10 @@ class SimpleBenchmark:
 
             batch_time = time()
             preds = model(inputs)
-            preds = F.softmax(preds, dim=-1).data.cpu().numpy()
+            preds = F.softmax(preds, dim=-1)
             avg_batch_time.append(time() - batch_time)
 
+            preds = preds.data.cpu().numpy()
             preds_dict.update({name: label for name, label in zip(names, preds)})
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
         return preds_dict

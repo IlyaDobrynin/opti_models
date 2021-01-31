@@ -43,8 +43,10 @@ def bench_all():
         for trt_model_name in trt_model_names:
             name_list = trt_model_name.split("_")
             for n in name_list:
-                if n startswith("prec"):
+                if n.startswith("prec"):
                     precision = n.split("-")[1]
+                else:
+                    raise ValueError(f"Can't find precision in trt_model_name: {trt_model_name}")
             logging.info(f"\tPRECISION: {precision} -------------")
             trt_path = os.path.join(trt_model_path, trt_model_name)
             args = parse_args()
