@@ -113,7 +113,8 @@ python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx_export/re
 ## Models
 [Back to Content](#Content)
 
-For list of all models see [MODELS.md](/opti_models/models/MODELS.md)
+For list of all models see [MODELS.md](/opti_models/models/MODELS.md). <br>
+There you can find list of all available pretrained backbones and results of benchmarks for this models.
 
 ## Benchmarks
 [Back to Content](#Content)
