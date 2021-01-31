@@ -41,7 +41,10 @@ def bench_all():
         trt_model_path = os.path.join(trt_models_path, model_name)
         trt_model_names = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")]
         for trt_model_name in trt_model_names:
-            precision = trt_model_name.split("_")[1].split("-")[1]
+            name_list = trt_model_name.split("_")
+            for n in name_list:
+                if n startswith("prec"):
+                    precision = n.split("-")[1]
             logging.info(f"\tPRECISION: {precision} -------------")
             trt_path = os.path.join(trt_model_path, trt_model_name)
             args = parse_args()
