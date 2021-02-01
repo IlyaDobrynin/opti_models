@@ -1,5 +1,7 @@
 from torchvision import models
 
+__all__ = ['resnext50_32x4d', 'resnext101_32x8d']
+
 
 def resnext50_32x4d(pretrained: bool, progress: bool = True, requires_grad: bool = True):
     model = models.resnext50_32x4d(pretrained=pretrained, progress=progress)

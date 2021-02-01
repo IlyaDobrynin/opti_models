@@ -1,5 +1,7 @@
 from torchvision import models
 
+__all__ = ['densenet121', 'densenet161', 'densenet169', 'densenet201']
+
 
 def densenet121(pretrained: bool, progress: bool = True, requires_grad: bool = True):
     model = models.densenet121(pretrained=pretrained, progress=progress)

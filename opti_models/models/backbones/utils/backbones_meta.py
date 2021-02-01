@@ -2,12 +2,17 @@ from .skip_names import RESNET_LAYERS, MOBILENET_LAYERS, EFFICIENTNET_LAYERS, MI
 
 
 encoder_dict = {
-    # RESNET
+    # TORCHVISION MODELS
     'resnet18': {'skip': RESNET_LAYERS, 'filters': (64, 64, 128, 256, 512), 'features': False},
     'resnet34': {'skip': RESNET_LAYERS, 'filters': (64, 64, 128, 256, 512), 'features': False},
     'resnet50': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
     'resnet101': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
     'resnet152': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
+
+    'resnext50_32x4d': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
+    'resnext101_32x8d': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
+    'wide_resnet50_2': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
+    'wide_resnet101_2': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
 
     # MOBILENET
     'mobilenetv2_w1': {'skip': MOBILENET_LAYERS, 'filters': (16, 24, 32, 96, 1280), 'features': True},
