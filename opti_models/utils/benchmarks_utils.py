@@ -23,6 +23,7 @@ def load_engine(trt_runtime, engine_path):
     with open(engine_path, 'rb') as f:
         engine_data = f.read()
     engine = trt_runtime.deserialize_cuda_engine(engine_data)
+    print(engine)
     return engine
 
 
@@ -51,9 +52,8 @@ def allocate_buffers(engine):
     # when using lower precision [e.g. NMS output would not be np.float32
     # anymore, even though this is assumed in binding_to_type]
     binding_to_type = {"input": np.float32, "output": np.float32}
-
     for binding in engine:
-        size = trt.volume(engine.get_binding_shape(binding)) * engine.max_batch_size
+        size = trt.volume(engine.get_binding_shape(binding))  # * engine.max_batch_size
         dtype = binding_to_type[str(binding)]
         # Allocate host and device buffers
         host_mem = cuda.pagelocked_empty(size, dtype)
@@ -66,6 +66,13 @@ def allocate_buffers(engine):
         else:
             outputs.append(HostDeviceMem(host_mem, device_mem))
     return inputs, outputs, bindings, stream
+
+
+def get_shapes(engine: trt.ICudaEngine):
+    sizes = []
+    for binding in engine:
+        sizes.append(trt.volume(engine.get_binding_shape(binding)))
+    return sizes
 
 
 def prepare_data(path_to_images: str):

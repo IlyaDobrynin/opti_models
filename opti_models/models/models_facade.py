@@ -6,8 +6,8 @@ from typing import Union
 from torch.nn import Module
 from . import ClassificationFactory
 from .backbones.backbone_factory import BACKBONES
-
-# import segmentation_models_pytorch as smp
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 class ModelFacade:
@@ -16,23 +16,24 @@ class ModelFacade:
         Arguments:
             task:           Task for the model:
                                 - classification
-                                - segmentation
+                                - opti-classification
                                 - detection
+                                - ocr
             model_name:     Name of the architecture for the given task. See in documentation.
 
     """
 
     _models_dict = {
-        "backbones": BACKBONES,
-        "classification": {
+        "classification": BACKBONES,
+        "opti-classification": {
             "basic_classifier": ClassificationFactory,
         },
-        "segmentation": {
-        },
-        "detection": {
-        },
-        "ocr": {
-        }
+        # "segmentation": {
+        # },
+        # "detection": {
+        # },
+        # "ocr": {
+        # }
     }
 
     def __init__(self, task: str):
@@ -66,3 +67,10 @@ class ModelFacade:
             )
 
         return model_class
+
+    def show_available_models(self):
+        for m_type, m_dict in self._models_dict.items():
+            logging.info(f"\tModels, available for {m_type}:")
+            for m_name in m_dict.keys():
+                logging.info(f"\t\t{m_name}")
+

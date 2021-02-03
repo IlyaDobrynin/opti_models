@@ -1,6 +1,19 @@
-# opti_models
+# Opti Models
+Repo for the easy-way models convertation.
+
+## Content
+1. [Install](#Install)
+2. [Convertation](#Convertation)
+    - [ONNX](#ONNX-Convertation)
+    - [TensorRT](#Tensorrt-Convertation)
+3. [Models](#Models)
+4. [Benchmarks](#Benchmarks)
+5. [Simple pipeline example](#Simple-pipeline-example)
+6. [Citing](#Citing)
+7. [License](#License)
 
 ## Install
+[Back to Content](#Content)
 
 0. Clone the repo:
 ```
@@ -22,104 +35,191 @@ pip install --upgrade nvidia-tensorrt
 ````
 
 ## Convertation
-**CURRENTLY IN DEV MODE**
+[Back to Content](#Content)
 
-
-
-### ONNX Convertation with Python
-
+### ONNX Convertation
+[Back to Content](#Content)
+#### Predefined models
 1. Run:
 ```
-    python opti_models/convertations/cvt_onnx.py --model_name MODEL_NAME --export_dir EXPORT_ONNX_DIR --model_mode 'torchvision' --ckpt_path CKPT_PATH --batch_size BATCH_SIZE --in_size IN_SIZE --num_classes NUM_CLASSES    
-```
-For instance, in order to convert ResNet18 with ImageNet pretraning run:
-```
-    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --model_mode 'torchvision' True --batch_size 1 --in_size 224 224
-```
-For instance, in order to convert you own ResNet18 torchvision model with custom weights run:
-```
-    python opti_models/convertations/cvt_onnx.py --model_name 'resnet18' --export_dir 'data/onnx_export' --model_mode 'torchvision' True --batch_size 1 --in_size 224 224 --ckpt_path CKPT_PATH --num_classes NUM_CLASSES
+python opti_models/convertations/cvt_onnx.py --model-name BACKBONE_NAME
 ```
 
-If you're converting your own model with custom `NUM_CLASSES`, opti_models simply changes the last FC layer of the network, so that the output dimention is equal to `NUM_CLASSES`, instead of 1000 in the ImageNet pretraining. If you have a custom head (or the entire model) — check [ONNX Convertation with Python — Custom Model](#onnx-convertation-with-python--custom-model)
+Parameters cheatsheet:
 
-By default, `cvt_onnx.py` will generate 2 outputs: regular `.onnx` file and a simplified version of it, obtained with ONNX simplifier. 
+- `model-name` (str, required) - Name of the model.
+- `model-type` (str, optional) - Type of the model. Default: `classifier`. Options:
+  - `classifier` - simply backbone classification model
+  - `opti-classifier` - opti-models classification model
+  - `custom` - your own torchvision models.    
+- `model-path` (str, optional) - Path to the model. Default: `ImageNet` - model with imagenet pretrain.
+- `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
+- `size` (int int int, optional) - Image size `[Ch x H x W]`. Default: `3 224 224`.
+- `num-classes` (int, optional) - Num classes in the head for backbone model. Default: `1000`.
+- `export-dir` (str, optional) - Directory to export onnx converted files. Default: `data/onnx-export`.
 
+If you're converting your own model with custom `num-classes`, opti_models simply changes the last FC layer of the network,
+so that the output dimention is equal to `num-classes`, instead of 1000 in the ImageNet pretraining. 
 
-### ONNX Convertation with Python — Custom Model
+If you have a custom head (or the entire model) — check [ONNX Convertation — Custom Model](#onnx-convertation--custom-model)
 
-The script for convertation is `cvt_onxx.py`. In order to convert something entirely custom, you need to change just 1 line of script. In particular, 96th line:
+By default, cvt_onnx.py will generate 2 outputs: regular .onnx file and a simplified version of it, obtained with ONNX simplifier.
+
+**Examples:**
+```
+# Convert simple resnet with imagenet pretrain
+python opti_models/convertations/cvt_onnx.py --model-name resnet18
+
+# Convert you own ResNet18 torchvision model with batch size 1, 
+# image size 224x224, num classes 1 and custom weights
+python opti_models/convertations/cvt_onnx.py --model-name resnet18 --model-path CKPT-PATH --batch_size 1 --size 3 224 224 --num-classes 1
+```
+
+#### Entirely custom model
+
+The script for convertation is `cvt_onxx.py`. In order to convert something entirely custom, you need to use python api and 
+provide `model` argument to the `make_onnx_convertation` function.
+
+**Example:**
 
 ````
-# Implement your own Model Class
-model = None
+from opti_models import make_onnx_convertation
+model = MyModel(**my_model_parameters)
+make_onnx_convertation(model=model, **other_parameters)
 ````
-Change this to `model = GetCustomModel()`, and you're good to go. Note that it's not guaranteed for custom models to successfully convert to ONNX or TRT, since some operations simply are not supported by either ONNX or TRT.   
+**Important**: It's not guaranteed for custom models to successfully convert to ONNX or TRT, since some operations 
+simply are not supported by either ONNX or TRT.   
 
 
-### ONNX Convertation with Bash:
-
-1. In `scripts/convertations/onnx_convertation.sh` change:
-    - `model_name` - name of the model to convert
-    - `export_dir` - directory to export onnx converted file (default `data/onnx_export`)
-    - `model_mode` - whether this model is from torchvision, opti_models, or your custom model (default `torchvision`)
-    - `ckpt_path` - path to checkpoint (default `imagenet` for regular ImageNet pretraining)
-    - `batch_size` - batch size for converted model (default `1`) 
-    - `in_size` - image size (default `224 224`)
-    - `num_classes` - when loading torchvision model, specify the num_classes in the head (default `1000`)
-2. Run:
-```
-    bash scripts/convertations/onnx_convertation.sh
-```
-
-### TensorRT Convertation with Python
-
+### TensorRT Convertation
+[Back to Content](#Content)
 1. Run:
 ```
-    python opti_models/convertations/cvt_tensorrt.py --onnx_path ONNX_MODEL_PATH --export_dir EXPORT_TRT_DIR --batch_size BATCH_SIZE--in_size IN_SIZE -fp_type PRECISION_TYPE    
+python opti_models/convertations/cvt_tensorrt.py --onnx-path 
 ```
 
-For instance, in order to convert the previously converted ResNet18 model to TRT run:
+Parameters cheatsheet:
 
-```
-    python opti_models/convertations/cvt_tensorrt.py --onnx_path data/onnx_export/resnet18/resnet18_bs-1_res-224x224_simplified.onnx --export_dir data/trt_export --batch_size 1 --in_size 224 224 --fp_type 32
-```
-### TensorRT Convertation with Bash
+- `onnx-path` (str, required) - Path to the exported onnx model.
+- `precision` (str, optional) - Precision of the TRT engine, 32 (for FP32) or 16 (for FP16). Default: `32`.
+- `export-dir` (str, optional) - Directory to export TRT engine . Default: `data/trt-export`.
 
-1. In `scripts/convertations/tensorrt_convertation.sh` change:
-    - `onnx_path` - path to the ONNX file
-    - `export_dir` - directory to export converted file (default `data/trt_export`)
-    - `batch_size` - batch size for converted model (default = 1) 
-    - `fp_type` - type of float point precision, could be "16" or "32" (default = "32") 
-2. Run:
+**Example:**
 ```
-    bash scripts/convertations/tensorrt_convertation.sh
+# Convert previously converted ResNet18 ONNX model
+python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx_export/resnet18/resnet18_bs-1_res-3x224x224_simplified.onnx 
 ```
 
 ## Models
-For list of all models see [MODELS.md](/opti_models/models/MODELS.md)
+[Back to Content](#Content)
+
+For list of all models see [MODELS.md](/opti_models/models/MODELS.md). <br>
+There you can find list of all available pretrained backbones and results of benchmarks for this models.
 
 ## Benchmarks
-
+[Back to Content](#Content)
 ### Imagenet
-For all imagenet benchmarks you should download and untar: https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing
-
-#### Torch Imagenet Benchmark
-1. In `scripts/benchmarks/torch_imagenet_benchmark.sh` change:
-    - `path_to_images` - path to the `imagenetv2-top-images-format-val` folder
-    - `model_name` - name of the model to bench
-    - `batch_size` - anount of the images in every batch
-    - `workers` - number of workersл 
-2. Run: 
+### 1. Prepare data
+For all imagenet benchmarks you need to prepare data:
+1. Download data from [GoogleDrive](https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing)
+2. Untar it to the `usr/local/opti_models`:
 ```
-    bash scripts/benchmarks/torch_imagenet_benchmark.sh
-```
-#### Tensorrt Imagenet Benchmark
-1.  In `scripts/benchmarks/tensorrt_imagenet_benchmark.sh` change:
-    - `path_to_images` - path to the `imagenetv2-top-images-format-val` folder
-    - `trt_path` - path to the TensorRT .engine model (for convertation see [Convertation](#Convertation))
-2. Run: 
-```
-    bash scripts/benchmarks/tensorrt_imagenet_benchmark.sh
+sudo mkdir -p /usr/local/opti_models 
+sudo mv imagenetv2-topimages.tar /usr/local/opti_models/
+sudo tar -xvf imagenetv2-topimages.tar
 ```
 
+### 2. Run imagenet Benchmark with pyTorch models
+```
+python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name MODEL-NAME
+```
+Parameters cheatsheet:
+- `model-name` (str, required) - name of the model to test.
+- `path-to-images` (str, optional) - path to the validation set. Default - `/usr/local/opti_models/imagenetv2-top-images-format-val`.
+- `size` (int int, optional) - Image size. Default: `224 224`.
+- `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
+- `workers` (int, optional) - Number of the workers. Default: `1`
+
+### 3. Run imagenet Benchmark with TensorRT models
+```
+python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path TRT-PATH
+```
+Parameters cheatsheet:
+- `trt-path` (str, required) - path to the TensorRT model.
+- `path-to-images` (str, required) - path to the validation set. Default - `/usr/local/opti_models/imagenetv2-top-images-format-val`.
+
+## Simple pipeline example
+[Back to Content](#Content)
+#### Let's sum up simple end2end pipeline for convertations and benchmarking:
+1. First let's run simple pytorch speed benchmark with resnet18: 
+```
+python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name resnet18
+
+Output:
+INFO:root:      TORCH BENCHMARK FOR resnet18: START
+100%|█████████████| 10000/10000 [01:28<00:00, 112.92it/s]
+INFO:root:      Average fps: 213.2855109396426
+INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
+INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
+INFO:root:      BENCHMARK FOR resnet18: SUCCESS
+```
+2. Then, convert this model to ONNX:
+```
+python opti_models/convertations/cvt_onnx.py --model-name resnet18
+
+Output:
+INFO:root:      Convert to ONNX: START
+INFO:root:      Convert to ONNX: SUCCESS
+INFO:root:      ONNX check: SUCCESS
+INFO:root:      Convert to ONNX Simplified: START
+INFO:root:      Convert to ONNX Simplified: SUCCESS
+INFO:root:      Result validation: START
+INFO:root:      Result validation: SUCCESS
+INFO:root:      >>>>> Result dim = (1, 1000)
+```
+3. After that, try to convert ONNX model to TensorRT:
+```
+python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx-export/resnet18/resnet18_bs-1_res-3x224x224_simplified.onnx
+
+Output:
+INFO:root:      Convert to TensorRT: START
+INFO:root:      >>>>> TensorRT inference engine settings:
+INFO:root:      >>>>>   * Inference precision - DataType.FLOAT
+INFO:root:      >>>>>   * Max batch size - 1
+INFO:root:      >>>>> ONNX file parsing: START
+INFO:root:      >>>>> Num of network layers: 51
+INFO:root:      >>>>> Building TensorRT engine. This may take a while...
+INFO:root:      >>>>> TensorRT engine build: SUCCESS
+INFO:root:      >>>>> Saving TensorRT engine
+INFO:root:      >>>>> TensorRT engine save: SUCCESS
+INFO:root:      Convert to TensorRT: SUCCESS
+```
+4. Last step - let's see the TRT model performance on the same data as in step 1:
+```
+python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_prec-32_bs-1_res-3x224x224.engine
+
+Output:
+INFO:root:      TENSORRT BENCHMARK FOR resnet18: START
+100%|█████████████| 10000/10000 [01:17<00:00, 129.49it/s]
+INFO:root:      Average fps: 1005.4750549267463
+INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
+INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
+INFO:root:      BENCHMARK FOR resnet18: SUCCESS
+```
+
+## Citing
+[Back to Content](#Content)
+```
+@misc{Dobrynin:2021,
+  Author = {Dobrynin, Ilya and Panshin, Ivan},
+  Title = {Opti Models: Easy-Way Models Convertations},
+  Year = {2021},
+  Publisher = {GitHub},
+  Journal = {GitHub repository},
+  Howpublished = {\url{https://github.com/IlyaDobrynin/opti_models}}
+}
+```
+## License
+[Back to Content](#Content)
+
+Project is distributed under [MIT License](LICENSE)
