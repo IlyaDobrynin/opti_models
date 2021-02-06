@@ -56,10 +56,10 @@ Parameters cheatsheet:
 - `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
 - `size` (int int int, optional) - Image size `[Ch x H x W]`. Default: `3 224 224`.
 - `num-classes` (int, optional) - Num classes in the head for backbone model. Default: `1000`.
-- `export-dir` (str, optional) - Directory to export onnx converted files. Default: `data/onnx-export`.
+- `export-name` (str, optional) - Name of the exported onnx file. Default: `{model-name}_bs-{batch-size}_res-{size}`.
 
 If you're converting your own model with custom `num-classes`, opti_models simply changes the last FC layer of the network,
-so that the output dimention is equal to `num-classes`, instead of 1000 in the ImageNet pretraining. 
+so that the output dimension is equal to `num-classes`, instead of 1000 in the ImageNet pretraining. 
 
 If you have a custom head (or the entire model) — check [ONNX Convertation — Custom Model](#onnx-convertation--custom-model)
 
@@ -72,7 +72,7 @@ python opti_models/convertations/cvt_onnx.py --model-name resnet18
 
 # Convert you own ResNet18 torchvision model with batch size 1, 
 # image size 224x224, num classes 1 and custom weights
-python opti_models/convertations/cvt_onnx.py --model-name resnet18 --model-path CKPT-PATH --batch_size 1 --size 3 224 224 --num-classes 1
+python opti_models/convertations/cvt_onnx.py --model-name resnet18 --model-path CKPT-PATH --num-classes 1
 ```
 
 #### Entirely custom model
@@ -102,7 +102,7 @@ Parameters cheatsheet:
 
 - `onnx-path` (str, required) - Path to the exported onnx model.
 - `precision` (str, optional) - Precision of the TRT engine, 32 (for FP32) or 16 (for FP16). Default: `32`.
-- `export-dir` (str, optional) - Directory to export TRT engine . Default: `data/trt-export`.
+- `export-name` (str, optional) - Name of the exported TRT engine . Default: `{model-name}_prec-{precision}_res-{size}`.
 
 **Example:**
 ```

@@ -79,7 +79,7 @@ def get_input_shape(model_path: str) -> t.Tuple:
 
 def make_trt_convertation(
         precision: str,
-        export_dir: str,
+        export_name: str,
         onnx_model_path: str,
         verbose: bool = True
     ):
@@ -90,10 +90,13 @@ def make_trt_convertation(
     bs, c, h, w = get_input_shape(model_path=onnx_model_path)
 
     model_name = onnx_model_path.split("/")[-2]
-    export_dir = os.path.join(export_dir, model_name)
+    export_dir = os.path.join('data/trt-export', model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-    out_model_name = f"{model_name}_prec-{precision}_bs-{bs}_res-{c}x{h}x{w}.engine"
+    if not export_name:
+        out_model_name = f"{model_name}_prec-{precision}_bs-{bs}_res-{c}x{h}x{w}.engine"
+    else:
+        out_model_name = f"{export_name}.engine"
     export_path = os.path.join(export_dir, out_model_name)
 
     trt_datatype = run_checks(precision, onnx_model_path)
@@ -139,12 +142,12 @@ def make_trt_convertation(
 def main(args):
     onnx_model_path = args.onnx_path
     precision = args.precision
-    export_dir = args.export_dir
+    export_name = args.export_name
     verbose = args.verbose
 
     make_trt_convertation(
         precision=precision,
-        export_dir=export_dir,
+        export_name=export_name,
         onnx_model_path=onnx_model_path,
         verbose=verbose
     )
@@ -153,7 +156,7 @@ def main(args):
 def parse_args():
     parser = argparse.ArgumentParser(description='TRT params')
     parser.add_argument('--onnx-path', type=str, required=True)
-    parser.add_argument('--export-dir', default='data/trt-export', type=str)
+    parser.add_argument('--export-name', type=str)
     parser.add_argument('--precision', default="32", type=str)
     parser.add_argument('--verbose', type=bool, default=True)
 

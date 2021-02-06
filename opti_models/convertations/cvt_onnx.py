@@ -14,11 +14,14 @@ sub_prefix = ">>>>> "
 __all__ = ["make_onnx_convertation"]
 
 
-def get_parameters(export_dir: str, model_name: str, batch_size: int, in_size: t.Tuple) -> t.Tuple:
-    export_dir = os.path.join(export_dir, model_name)
+def get_parameters(export_name: str, model_name: str, batch_size: int, in_size: t.Tuple) -> t.Tuple:
+    export_dir = os.path.join('data/onnx-export', model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-    out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[1]}x{in_size[2]}"
+    if not export_name:
+        out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[1]}x{in_size[2]}"
+    else:
+        out_model_name = export_name
     export_path = os.path.join(export_dir, f"{out_model_name}.onnx")
     export_simple_path = os.path.join(export_dir, f"{out_model_name}_simplified.onnx")
     input_size = (batch_size, in_size[0], in_size[1], in_size[2])
@@ -26,7 +29,7 @@ def get_parameters(export_dir: str, model_name: str, batch_size: int, in_size: t
 
 
 def make_onnx_convertation(
-        export_dir: str,
+        export_name: str,
         batch_size: int,
         model_name: str,
         in_size: t.Tuple,
@@ -40,7 +43,7 @@ def make_onnx_convertation(
         logging.info("\tConvert to ONNX: START")
 
     export_path, export_simple_path, input_size = get_parameters(
-        export_dir=export_dir,
+        export_name=export_name,
         model_name=model_name,
         batch_size=batch_size,
         in_size=in_size
@@ -127,11 +130,11 @@ def main(args):
     model_type = args.model_type
     num_classes = args.num_classes
     model_path = args.model_path
-    export_dir = args.export_dir
+    export_name = args.export_name
     verbose = args.verbose
 
     make_onnx_convertation(
-        export_dir=export_dir,
+        export_name=export_name,
         batch_size=batch_size,
         model_name=model_name,
         in_size=in_size,
@@ -148,7 +151,7 @@ def parse_args():
     parser.add_argument('--model-type', default='classifier', type=str, help="Type of the model")
     parser.add_argument('--model-path', type=str, default='ImageNet', help="Path to the pretrained weights, or ImageNet,"
                                                                      "if you want to get model with imagenet pretrain")
-    parser.add_argument('--export-dir', type=str, default='data/onnx-export', help="Path to directory to save results")
+    parser.add_argument('--export-name', type=str, help="Name of the exported onnx file")
     parser.add_argument('--batch-size', type=int, default=1, help="Batch size for optimized model")
     parser.add_argument('--size', nargs='+', default=(3, 224, 224), type=int, help="Size of the input tensor")
     parser.add_argument('--num-classes', default=1000, type=int, help="Number of output classes of the model")
