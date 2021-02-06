@@ -29,10 +29,27 @@ source venv/bin/activate
 2. Install dependencies
 ````
 pip install --upgrade pip
-pip install .
-pip install nvidia-pyindex
-pip install --upgrade nvidia-tensorrt
+pip install -r requirements.txt
+pip install -e .
 ````
+
+## Docker
+
+We highly advice you to work with this project inside the Docker that we've built for you. Otherwise, we can't guarantee that it will work due to various environmental reasons. 
+
+For Docker installation instructions follow:
+
+— [Docker installation](https://docs.docker.com/engine/install/ubuntu/)
+
+— [Make Docker run without root](https://docs.docker.com/engine/install/linux-postinstall/)
+
+After that:
+
+```
+docker build -t opti_models .
+docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -it opti_models
+```
+
 
 ## Convertation
 [Back to Content](#Content)
