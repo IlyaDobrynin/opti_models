@@ -3,7 +3,7 @@ Repo for the easy-way models convertation.
 
 ## Content
 1. [Install](#Install)
-    - [Docker](#Docker)
+    - [With Docker](#With-Docker)
     - [Without docker](#Without-docker)
 3. [Convertation](#Convertation)
     - [ONNX](#ONNX-Convertation)
@@ -24,7 +24,7 @@ Repo for the easy-way models convertation.
 git clone git@github.com:IlyaDobrynin/opti_models.git && cd opti_models
 git checkout dev
 ```
-### Docker
+### With Docker
 [Back to Content](#Content)
 
 We highly advice you to work with this project inside the Docker that we've built for you. 
