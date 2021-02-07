@@ -3,7 +3,8 @@ Repo for the easy-way models convertation.
 
 ## Content
 1. [Install](#Install)
-2. [Docker](#Docker)
+    - [Docker](#Docker)
+    - [Without docker](#Without-docker)
 3. [Convertation](#Convertation)
     - [ONNX](#ONNX-Convertation)
     - [TensorRT](#Tensorrt-Convertation)
@@ -21,20 +22,8 @@ Repo for the easy-way models convertation.
 git clone git@github.com:IlyaDobrynin/opti_models.git && cd opti_models
 git checkout dev
 ```
-
-1. Create a clean virtual environment 
-```
-python3 -m venv venv
-source venv/bin/activate
-```
-2. Install dependencies
-````
-pip install --upgrade pip
-pip install -r requirements.txt
-pip install -e .
-````
-
-## Docker
+### Docker
+[Back to Content](#Content)
 
 We highly advice you to work with this project inside the Docker that we've built for you. Otherwise, we can't guarantee that it will work due to various environmental reasons. 
 
@@ -51,6 +40,18 @@ docker build -t opti_models .
 docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -it opti_models
 ```
 
+### Without docker
+1. Create a clean virtual environment 
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+2. Install dependencies
+````
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -e .
+````
 
 ## Convertation
 [Back to Content](#Content)
