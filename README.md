@@ -17,6 +17,8 @@ Repo for the easy-way models convertation.
 ## Install
 [Back to Content](#Content)
 
+#### **NOTE** You need to have nvidia divers and CUDA installed. [Details](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) 
+
 0. Clone the repo:
 ```
 git clone git@github.com:IlyaDobrynin/opti_models.git && cd opti_models
@@ -25,20 +27,32 @@ git checkout dev
 ### Docker
 [Back to Content](#Content)
 
-We highly advice you to work with this project inside the Docker that we've built for you. Otherwise, we can't guarantee that it will work due to various environmental reasons. 
+We highly advice you to work with this project inside the Docker that we've built for you. 
+Otherwise, we can't guarantee that it will work due to various environmental reasons. 
 
-For Docker installation instructions follow:
+Steps for work with docker:
+1. Set up Docker:
+    - [Install docker](https://docs.docker.com/engine/install/ubuntu/)
+    - [Make Docker run without root](https://docs.docker.com/engine/install/linux-postinstall/)
+    - [Install nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit)
+2. Build docker image (from PROJECT_DIR - directory, where opti_models locates):
+    ```
+    docker build -t opti_models .
+    ```
+    At first it may take a while.
+3. **_OPTIONAL STEP_** If you want to run imagenet benchmarks on the predefined backbones, you need to download data
+and place in to the `/usr/local/opti_models` directory. Details [here](#1-prepare-data)
 
-— [Docker installation](https://docs.docker.com/engine/install/ubuntu/)
-
-— [Make Docker run without root](https://docs.docker.com/engine/install/linux-postinstall/)
-
-After that:
-
-```
-docker build -t opti_models .
-docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -it opti_models
-```
+4. Run docker container:
+    - Without mounting data folder for benchmarks:
+        ```
+        docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -it opti_models
+        ```
+    - With mounting data folder for benchmarks (only if you have step 3 done):
+        ```
+        docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -v /usr/local/opti_models/:/usr/local/opti_models/ -it opti_models
+        ```
+    Where PROJECT_DIR is the directory, where opti_models locates
 
 ### Without docker
 1. Create a clean virtual environment 
@@ -50,6 +64,8 @@ source venv/bin/activate
 ````
 pip install --upgrade pip
 pip install -r requirements.txt
+pip install nvidia-pyindex
+pip install --upgrade nvidia-tensorrt
 pip install -e .
 ````
 
@@ -138,7 +154,7 @@ There you can find list of all available pretrained backbones and results of ben
 ## Benchmarks
 [Back to Content](#Content)
 ### Imagenet
-### 1. Prepare data
+#### 1. Prepare data
 For all imagenet benchmarks you need to prepare data:
 1. Download data from [GoogleDrive](https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing)
 2. Untar it to the `usr/local/opti_models`:
@@ -148,7 +164,7 @@ sudo mv imagenetv2-topimages.tar /usr/local/opti_models/
 sudo tar -xvf imagenetv2-topimages.tar
 ```
 
-### 2. Run imagenet Benchmark with pyTorch models
+#### 2. Run imagenet Benchmark with pyTorch models
 ```
 python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name MODEL-NAME
 ```
@@ -159,7 +175,7 @@ Parameters cheatsheet:
 - `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
 - `workers` (int, optional) - Number of the workers. Default: `1`
 
-### 3. Run imagenet Benchmark with TensorRT models
+#### 3. Run imagenet Benchmark with TensorRT models
 ```
 python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path TRT-PATH
 ```

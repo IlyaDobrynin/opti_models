@@ -127,8 +127,8 @@ def make_trt_convertation(
     else:
         if verbose:
             logging.info(f"\t{sub_prefix}TensorRT engine build: SUCCESS")
+    
     # Save the engine to file
-
     try:
         save_engine(trt_engine, export_path)
     except:
