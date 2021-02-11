@@ -84,7 +84,13 @@ def get_model(
 
     if isinstance(model_path, str) and model_path != 'ImageNet':
         if os.path.exists(model_path):
-            model.load_state_dict(torch.load(model_path))
+            try:
+                model.load_state_dict(torch.load(model_path))
+            except RuntimeError:
+                model.load_state_dict(torch.load(model_path)['model_state_dict'])
+            except:
+                raise RuntimeError('Please provide model weights either as the whole file, or as a \'model_state_dict\' part of the file')
+
         else:
             raise FileNotFoundError(f"No such file or directory: {model_path}")
 
