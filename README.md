@@ -35,7 +35,7 @@ Steps for work with docker:
     - [Install docker](https://docs.docker.com/engine/install/ubuntu/)
     - [Make Docker run without root](https://docs.docker.com/engine/install/linux-postinstall/)
     - [Install nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit)
-2. Build docker image (from PROJECT_DIR - directory, where opti_models locates):
+2. Build docker image (from PROJECT_DIR - directory, where opti_models is located):
     ```
     docker build -t opti_models .
     ```
@@ -52,7 +52,7 @@ and place in to the `/usr/local/opti_models` directory. Details [here](#1-prepar
         ```
         docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -v /usr/local/opti_models/:/usr/local/opti_models/ -it opti_models
         ```
-    Where PROJECT_DIR is the directory, where opti_models locates
+    Where PROJECT_DIR is the directory, where opti_models is located
 
 ### Without docker
 1. Create a clean virtual environment 
