@@ -1,0 +1,14 @@
+opencv-python>=4.1.0.25
+torchsummary==1.5.1
+numpy>=1.15.4
+pandas>=0.23.4
+albumentations==0.4.0
+tqdm>=4.28.1
+onnx==1.7.0
+onnxruntime==1.5.2
+pycuda==2020.1
+onnx-simplifier==0.2.18
+scikit_image>=0.14.2
+torch==1.7.0
+requests==2.21.0
+torchvision==0.8.1
