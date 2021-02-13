@@ -90,7 +90,6 @@ def get_model(
                 model.load_state_dict(torch.load(model_path)['model_state_dict'])
             except:
                 raise RuntimeError('Please provide model weights either as the whole file, or as a \'model_state_dict\' part of the file')
-
         else:
             raise FileNotFoundError(f"No such file or directory: {model_path}")
 

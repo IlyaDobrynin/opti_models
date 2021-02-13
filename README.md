@@ -5,19 +5,19 @@ Repo for the easy-way models convertation.
 1. [Install](#Install)
     - [With Docker](#With-Docker)
     - [Without docker](#Without-docker)
-3. [Convertation](#Convertation)
+2. [Convertation](#Convertation)
     - [ONNX](#ONNX-Convertation)
     - [TensorRT](#Tensorrt-Convertation)
-4. [Models](#Models)
-5. [Benchmarks](#Benchmarks)
-6. [Simple pipeline example](#Simple-pipeline-example)
-7. [Citing](#Citing)
-8. [License](#License)
+3. [Models](#Models)
+4. [Benchmarks](#Benchmarks)
+5. [Simple pipeline example](#Simple-pipeline-example)
+6. [Citing](#Citing)
+7. [License](#License)
 
 ## Install
 [Back to Content](#Content)
 
-#### **NOTE** You need to have nvidia divers and CUDA installed. [Details](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) 
+#### **NOTE** You need to have nvidia divers and CUDA installed. [Details](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
 
 0. Clone the repo:
 ```
@@ -81,7 +81,6 @@ python opti_models/convertations/cvt_onnx.py --model-name BACKBONE_NAME
 ```
 
 Parameters cheatsheet:
-
 - `model-name` (str, required) - Name of the model.
 - `model-type` (str, optional) - Type of the model. Default: `classifier`. Options:
   - `classifier` - simply backbone classification model
@@ -117,14 +116,13 @@ provide `model` argument to the `make_onnx_convertation` function.
 
 **Example:**
 
-````
+```
 from opti_models import make_onnx_convertation
 model = MyModel(**my_model_parameters)
 make_onnx_convertation(model=model, **other_parameters)
-````
+```
 **Important**: It's not guaranteed for custom models to successfully convert to ONNX or TRT, since some operations 
 simply are not supported by either ONNX or TRT.   
-
 
 ### TensorRT Convertation
 [Back to Content](#Content)
@@ -164,7 +162,7 @@ sudo mv imagenetv2-topimages.tar /usr/local/opti_models/
 sudo tar -xvf imagenetv2-topimages.tar
 ```
 
-#### 2. Run imagenet Benchmark with pyTorch models
+#### 2. Run imagenet Benchmark with PyTorch models
 ```
 python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name MODEL-NAME
 ```
@@ -187,60 +185,59 @@ Parameters cheatsheet:
 [Back to Content](#Content)
 #### Let's sum up simple end2end pipeline for convertations and benchmarking:
 1. First let's run simple pytorch speed benchmark with resnet18: 
-```
-python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name resnet18
-
-Output:
-INFO:root:      TORCH BENCHMARK FOR resnet18: START
-100%|█████████████| 10000/10000 [01:28<00:00, 112.92it/s]
-INFO:root:      Average fps: 213.2855109396426
-INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
-INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
-INFO:root:      BENCHMARK FOR resnet18: SUCCESS
-```
+    ```
+    python opti_models/benchmarks/imagenet_torch_benchmark.py --model-name resnet18
+    Output:
+    INFO:root:      TORCH BENCHMARK FOR resnet18: START
+    100%|█████████████| 10000/10000 [01:28<00:00, 112.92it/s]
+    INFO:root:      Average fps: 213.2855109396426
+    INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
+    INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
+    INFO:root:      BENCHMARK FOR resnet18: SUCCESS
+    ```
 2. Then, convert this model to ONNX:
-```
-python opti_models/convertations/cvt_onnx.py --model-name resnet18
-
-Output:
-INFO:root:      Convert to ONNX: START
-INFO:root:      Convert to ONNX: SUCCESS
-INFO:root:      ONNX check: SUCCESS
-INFO:root:      Convert to ONNX Simplified: START
-INFO:root:      Convert to ONNX Simplified: SUCCESS
-INFO:root:      Result validation: START
-INFO:root:      Result validation: SUCCESS
-INFO:root:      >>>>> Result dim = (1, 1000)
-```
+    ```
+    python opti_models/convertations/cvt_onnx.py --model-name resnet18
+    
+    Output:
+    INFO:root:      Convert to ONNX: START
+    INFO:root:      Convert to ONNX: SUCCESS
+    INFO:root:      ONNX check: SUCCESS
+    INFO:root:      Convert to ONNX Simplified: START
+    INFO:root:      Convert to ONNX Simplified: SUCCESS
+    INFO:root:      Result validation: START
+    INFO:root:      Result validation: SUCCESS
+    INFO:root:      >>>>> Result dim = (1, 1000)
+    ```
 3. After that, try to convert ONNX model to TensorRT:
-```
-python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx-export/resnet18/resnet18_bs-1_res-3x224x224_simplified.onnx
-
-Output:
-INFO:root:      Convert to TensorRT: START
-INFO:root:      >>>>> TensorRT inference engine settings:
-INFO:root:      >>>>>   * Inference precision - DataType.FLOAT
-INFO:root:      >>>>>   * Max batch size - 1
-INFO:root:      >>>>> ONNX file parsing: START
-INFO:root:      >>>>> Num of network layers: 51
-INFO:root:      >>>>> Building TensorRT engine. This may take a while...
-INFO:root:      >>>>> TensorRT engine build: SUCCESS
-INFO:root:      >>>>> Saving TensorRT engine
-INFO:root:      >>>>> TensorRT engine save: SUCCESS
-INFO:root:      Convert to TensorRT: SUCCESS
-```
+    ```
+    python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx-export/resnet18/resnet18_bs-1_res-3x224x224_simplified.onnx
+    
+    Output:
+    INFO:root:      Convert to TensorRT: START
+    INFO:root:      >>>>> TensorRT inference engine settings:
+    INFO:root:      >>>>>   * Inference precision - DataType.FLOAT
+    INFO:root:      >>>>>   * Max batch size - 1
+    INFO:root:      >>>>> ONNX file parsing: START
+    INFO:root:      >>>>> Num of network layers: 51
+    INFO:root:      >>>>> Building TensorRT engine. This may take a while...
+    INFO:root:      >>>>> TensorRT engine build: SUCCESS
+    INFO:root:      >>>>> Saving TensorRT engine
+    INFO:root:      >>>>> TensorRT engine save: SUCCESS
+    INFO:root:      Convert to TensorRT: SUCCESS
+    ```
 4. Last step - let's see the TRT model performance on the same data as in step 1:
-```
-python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_prec-32_bs-1_res-3x224x224.engine
-
-Output:
-INFO:root:      TENSORRT BENCHMARK FOR resnet18: START
-100%|█████████████| 10000/10000 [01:17<00:00, 129.49it/s]
-INFO:root:      Average fps: 1005.4750549267463
-INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
-INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
-INFO:root:      BENCHMARK FOR resnet18: SUCCESS
-```
+    ```
+    python opti_models/benchmarks/imagenet_tensorrt_benchmark.py --trt-path data/trt-export/resnet18/resnet18_prec-32_bs-1_res-3x224x224.engine
+    
+    Output:
+    INFO:root:      TENSORRT BENCHMARK FOR resnet18: START
+    100%|█████████████| 10000/10000 [01:17<00:00, 129.49it/s]
+    INFO:root:      Average fps: 1005.4750549267463
+    INFO:root:      TOP 1 ACCURACY: 70.19   TOP 1 ERROR: 29.81
+    INFO:root:      TOP 5 ACCURACY: 90.49   TOP 5 ERROR: 9.51
+    INFO:root:      BENCHMARK FOR resnet18: SUCCESS
+    ```
 
 ## Citing
 [Back to Content](#Content)
@@ -254,6 +251,7 @@ INFO:root:      BENCHMARK FOR resnet18: SUCCESS
   Howpublished = {\url{https://github.com/IlyaDobrynin/opti_models}}
 }
 ```
+
 ## License
 [Back to Content](#Content)
 
