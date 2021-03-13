@@ -34,7 +34,7 @@ def _test_model(model: torch.nn.Module, device: str, model_name: str, reference_
 
 
 @pytest.mark.parametrize("model_name", MODEL_NAMES)
-@pytest.mark.parametrize("device", ["cpu", "cuda"])
+@pytest.mark.parametrize("device", ["cpu"])
 def test_forward(model_name: str, device: str):
     seed_everything()
     if model_name in os.listdir(REFERENCES_PATH):
