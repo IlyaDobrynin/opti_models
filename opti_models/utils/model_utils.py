@@ -1,10 +1,13 @@
+import logging
 import os
 import typing as t
+
 import torch
 from torch.nn import Module
 from torchsummary import summary
+
 from ..models import models_facade
-import logging
+
 logging.basicConfig(level=logging.INFO)
 
 __all__ = ["get_model"]
@@ -30,17 +33,17 @@ def _patch_last_linear(model: Module, num_classes: int):
 
 
 def get_model(
-        model_type: str,
-        model_name: str,
-        num_classes: t.Optional[int] = 1000,
-        input_shape: t.Optional[t.Tuple] = (3, 224, 224),
-        model: t.Optional[Module] = None,
-        model_path: t.Optional[str] = None,
-        classifier_params: t.Optional[t.Dict] = None,
-        show: bool = False
+    model_type: str,
+    model_name: str,
+    num_classes: t.Optional[int] = 1000,
+    input_shape: t.Optional[t.Tuple] = (3, 224, 224),
+    model: t.Optional[Module] = None,
+    model_path: t.Optional[str] = None,
+    classifier_params: t.Optional[t.Dict] = None,
+    show: bool = False,
 ) -> torch.nn.Module:
     if model_type == 'classifier':
-        if model_path.lower() == 'imagenet':
+        if isinstance(model_path, str) and model_path.lower() == 'imagenet':
             pretrained = True
         else:
             pretrained = False
@@ -63,23 +66,30 @@ def get_model(
             model_params = classifier_params
         else:
             model_params = dict(
-                backbone=model_name, depth=5, num_classes=num_classes, num_input_channels=input_shape[0],
-                num_last_filters=128, dropout=0.2, pretrained=pretrained, unfreeze_encoder=True,
-                custom_enc_start=False, use_complex_final=False, conv_type='default', bn_type='default',
-                activation_type='relu', depthwise=False
+                backbone=model_name,
+                depth=5,
+                num_classes=num_classes,
+                num_input_channels=input_shape[0],
+                num_last_filters=128,
+                dropout=0.2,
+                pretrained=pretrained,
+                unfreeze_encoder=True,
+                custom_enc_start=False,
+                use_complex_final=False,
+                conv_type='default',
+                bn_type='default',
+                activation_type='relu',
+                depthwise=False,
             )
             logging.info(f"\tArgument classifier_params is empty, use default:\n\t{model_params}")
         model = m_facade.get_model_class(model_definition='basic_classifier')(**model_params)
     elif model_type == 'custom':
         if model is None:
-            raise NotImplemented(
-                'Parameter model_mode is set to "custom", but model not specified.'
-            )
+            raise NotImplementedError('Parameter model_mode is set to "custom", but model not specified.')
     # TODO: Add segmentation, detection, OCR tasks
     else:
         raise NotImplementedError(
-            f"Model type {model_type} not implemented."
-            f"Use one of ['backbone', 'classifier', 'custom']"
+            f"Model type {model_type} not implemented." f"Use one of ['backbone', 'classifier', 'custom']"
         )
 
     if isinstance(model_path, str) and model_path != 'ImageNet':
@@ -88,8 +98,11 @@ def get_model(
                 model.load_state_dict(torch.load(model_path))
             except RuntimeError:
                 model.load_state_dict(torch.load(model_path)['model_state_dict'])
-            except:
-                raise RuntimeError('Please provide model weights either as the whole file, or as a \'model_state_dict\' part of the file')
+            except Exception:
+                raise RuntimeError(
+                    'Please provide model weights either as the whole file, '
+                    'or as a \'model_state_dict\' part of the file'
+                )
         else:
             raise FileNotFoundError(f"No such file or directory: {model_path}")
 

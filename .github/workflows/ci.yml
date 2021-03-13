@@ -1,8 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: CI
-
 on:
   push:
     branches: [ master ]
@@ -13,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: [3.6]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -23,12 +19,23 @@ jobs:
     - name: Cache pip
       uses: actions/cache@v1
       with:
-       path: ~/.cache/pip # This path is specific to Ubuntu
-       # Look to see if there is a cache hit for the corresponding requirements file
+       path: ~/.cache/pip
        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
        restore-keys: |
          ${{ runner.os }}-pip-
          ${{ runner.os }}-
-    # You can test your matrix by printing the current Python version
     - name: Display Python version
       run: python -c "import sys; print(sys.version)"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest==6.2.1
+        pip install opencv-python==4.1.0.25 torchsummary==1.5.1 numpy>=1.15.4 pandas>=0.23.4 albumentations==0.4.0
+        pip install tqdm>=4.28.1 onnx==1.7.0 onnxruntime==1.5.2 onnx-simplifier==0.2.18 scikit_image>=0.14.2
+        pip install torch==1.7.1+cpu torchvision==0.8.2+cpu -f https://download.pytorch.org/whl/torch_stable.html
+        pip install requests==2.21.0
+        pip install nvidia-pyindex
+        pip install --upgrade nvidia-tensorrt
+        pip install .
+    - name: tests
+      run: pytest
