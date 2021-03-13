@@ -29,9 +29,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install opencv-python==4.1.0.25 numpy>=1.15.4 pytest==6.2.1
-        pip install torch==1.7.1+cpu torchvision==0.8.2+cpu -f https://download.pytorch.org/whl/torch_stable.html
-        pip install tqdm>=4.28.1 onnx==1.7.0 onnxruntime==1.5.2 onnx-simplifier==0.2.18
+        pip install pytest==6.2.1
+        pip install opencv-python==4.1.0.25 torchsummary==1.5.1 numpy>=1.15.4 pandas>=0.23.4 albumentations==0.4.0
+        pip install tqdm>=4.28.1 onnx==1.7.0 onnxruntime==1.5.2 onnx-simplifier==0.2.18 scikit_image>=0.14.2
+        pip install torch==1.7.1 torchvision==0.8.2 -f https://download.pytorch.org/whl/torch_stable.html
+        pip install requests==2.21.0
         pip install nvidia-pyindex
         pip install --upgrade nvidia-tensorrt
         pip install .
