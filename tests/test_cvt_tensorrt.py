@@ -1,6 +1,7 @@
-import os
 import argparse
 import logging
+import os
+
 from opti_models.convertations.cvt_tensorrt import main
 
 logging.basicConfig(level=logging.INFO)
@@ -12,12 +13,12 @@ def parse_args():
     parser.add_argument('--export-dir', default='data/trt-export', type=str)
     parser.add_argument('--precision', default="32", type=str)
     parser.add_argument('--verbose', type=bool, default=True)
-
     return parser.parse_args()
 
 
 def cvt_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
+
     trt_dir = "data/trt-export"
     model_names = [name for name in show_available_backbones() if name not in os.listdir(trt_dir)]
     onnx_models = "data/onnx-export"
