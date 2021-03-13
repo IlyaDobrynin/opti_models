@@ -11,7 +11,6 @@ from opti_models.utils.common_utils import seed_everything
 from opti_models.utils.dump_references import initialize_decoder
 
 MODEL_NAMES = show_available_backbones()
-# MODEL_NAMES = ['resnet18', 'resnet34']
 REFERENCES_PATH = "tests/references"
 LENA_PATH = "tests/res/lenna.png"
 
@@ -34,7 +33,7 @@ def _test_model(model: torch.nn.Module, device: str, model_name: str, reference_
 
 
 @pytest.mark.parametrize("model_name", MODEL_NAMES)
-@pytest.mark.parametrize("device", ["cpu"])
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_forward(model_name: str, device: str):
     seed_everything()
     if model_name in os.listdir(REFERENCES_PATH):
