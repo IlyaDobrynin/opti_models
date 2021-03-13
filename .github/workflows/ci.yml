@@ -29,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install opencv-python==4.1.0.25 numpy>=1.15.4 torch==1.7.0+cpu torchvision==0.8.1+cpu pytest==6.2.1
+        pip install opencv-python==4.1.0.25 numpy>=1.15.4 torch==1.7.1+cpu torchvision==0.8.2+cpu pytest==6.2.1
         pip install tqdm>=4.28.1 onnx==1.7.0 onnxruntime==1.5.2 onnx-simplifier==0.2.18
         pip install nvidia-pyindex
         pip install --upgrade nvidia-tensorrt
