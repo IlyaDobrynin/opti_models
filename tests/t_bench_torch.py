@@ -1,5 +1,6 @@
 import argparse
 import logging
+
 from opti_models.benchmarks.imagenet_torch_benchmark import main
 
 logging.basicConfig(level=logging.INFO)
@@ -11,7 +12,9 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description='Simple speed benchmark, based on pyTorch models')
     parser.add_argument('--model-name', type=str, help="Name of the model to test", default='resnet18')
-    parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
+    parser.add_argument(
+        '--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}"
+    )
     parser.add_argument('--size', default=(224, 224), nargs='+', type=int, help="Input shape, default=(224, 224)")
     parser.add_argument('--batch-size', default=1, type=int, help="Size of the batch of images, default=1")
     parser.add_argument('--workers', default=1, type=int, help="Number of workers, default=1")
@@ -20,6 +23,7 @@ def parse_args():
 
 def bench_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
+
     excluded_names = [
         'efficientnet_b1b',
         'efficientnet_b2b',

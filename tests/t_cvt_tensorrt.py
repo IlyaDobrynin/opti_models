@@ -18,6 +18,7 @@ def parse_args():
 
 def cvt_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
+
     trt_dir = "data/trt-export"
     model_names = [name for name in show_available_backbones() if name not in os.listdir(trt_dir)]
     onnx_models = "data/onnx-export"

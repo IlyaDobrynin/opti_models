@@ -1,7 +1,9 @@
-import os
 import argparse
 import logging
+import os
+
 from opti_models.benchmarks.imagenet_tensorrt_benchmark import main
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -10,12 +12,15 @@ def parse_args():
     path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
     parser = argparse.ArgumentParser(description='Simple speed benchmark, based on TRT models')
     parser.add_argument('--trt-path', type=str, help="Path to TRT model")
-    parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
+    parser.add_argument(
+        '--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}"
+    )
     return parser.parse_args()
 
 
 def bench_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
+
     excluded_names = [
         'efficientnet_b1b',
         'efficientnet_b2b',
