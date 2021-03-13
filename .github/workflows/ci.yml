@@ -26,3 +26,5 @@ jobs:
          ${{ runner.os }}-
     - name: Display Python version
       run: python -c "import sys; print(sys.version)"
+    - name: tests
+      run: pytest

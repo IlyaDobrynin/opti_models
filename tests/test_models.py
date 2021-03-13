@@ -1,73 +1,48 @@
-import argparse
-import logging
+import os
 
-from opti_models.benchmarks.imagenet_torch_benchmark import main
+import cv2
+import numpy as np
+import pytest
+import torch
+from torch.nn import functional as F
 
-logging.basicConfig(level=logging.INFO)
+from opti_models import get_model, show_available_backbones
+from opti_models.utils.common_utils import seed_everything
+from opti_models.utils.dump_references import initialize_decoder
 
-
-def parse_args():
-    # Default args
-    path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
-
-    parser = argparse.ArgumentParser(description="Simple speed benchmark, based on pyTorch models")
-    parser.add_argument("--model-name", type=str, help="Name of the model to test", default="resnet18")
-    parser.add_argument(
-        "--path-to-images",
-        default=path,
-        type=str,
-        help=f"Path to the validation images, default: {path}",
-    )
-    parser.add_argument(
-        "--size",
-        default=(224, 224),
-        nargs="+",
-        type=int,
-        help="Input shape, default=(224, 224)",
-    )
-    parser.add_argument(
-        "--batch-size",
-        default=1,
-        type=int,
-        help="Size of the batch of images, default=1",
-    )
-    parser.add_argument("--workers", default=1, type=int, help="Number of workers, default=1")
-    return parser.parse_args()
+MODEL_NAMES = show_available_backbones()
+# MODEL_NAMES = ['resnet18', 'resnet34']
+REFERENCES_PATH = "tests/references"
+LENA_PATH = "tests/res/lenna.png"
 
 
-def bench_all():
-    from opti_models.models.backbones.backbone_factory import show_available_backbones
+def _test_model(model: torch.nn.Module, device: str, model_name: str, reference_val: float = 1e-10):
+    image = cv2.cvtColor(cv2.imread(LENA_PATH, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
+    image = torch.unsqueeze(torch.from_numpy(image.transpose(2, 0, 1).astype(np.float32)), 0)
+    image = image.to(device)
+    with torch.no_grad():
+        out = F.softmax(model(image), dim=-1)
+    sample = torch.load(os.path.join(REFERENCES_PATH, model_name, f"{model_name}-lena-{device}.ref"))
+    assert out.shape == sample.shape
 
-    excluded_names = [
-        "efficientnet_b1b",
-        "efficientnet_b2b",
-        "efficientnet_b3b",
-        "efficientnet_b4b",
-        "efficientnet_b5b",
-        "efficientnet_b6b",
-        "efficientnet_b7b",
-        "efficientnet_b0c",
-        "efficientnet_b1c",
-        "efficientnet_b2c",
-        "efficientnet_b3c",
-        "efficientnet_b4c",
-        "efficientnet_b5c",
-        "efficientnet_b6c",
-        "efficientnet_b7c",
-        "efficientnet_b8c",
-    ]
-    model_names = [name for name in show_available_backbones() if name not in excluded_names]
-    for i, model_name in enumerate(model_names):
-        logging.info(f"\t{i + 1}/{len(model_names)}")
-        args = parse_args()
-        args.model_name = model_name
-        if model_name == "genet_large":
-            args.in_size = (256, 256)
-        elif model_name == "inception_v3":
-            args.in_size = (299, 299)
-        main(args=args)
-        logging.info(f"-" * 100)
+    # for i in range(out.shape[-1]):
+    #     out_t = out[..., i]
+    #     sample_t = sample[..., i]
+    #     if not (np.abs((out_t.data.cpu().numpy() - sample_t.data.cpu().numpy())) < reference_val):
+    #         print(out_t, sample_t)
+    #     assert np.abs((out_t.data.cpu().numpy() - sample_t.data.cpu().numpy())) < reference_val
+
+
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_forward(model_name: str, device: str):
+    seed_everything()
+    if model_name in os.listdir(REFERENCES_PATH):
+        model = get_model(model_type='classifier', model_name=model_name, model_path=None, show=False)
+        model.apply(initialize_decoder)
+        model.to(device).eval()
+        _test_model(model=model, device=device, model_name=model_name)
 
 
 if __name__ == "__main__":
-    bench_all()
+    pytest.main([__file__])
