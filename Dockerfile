@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y libgl1-mesa-glx
 
 # Upgrade pip and indtall libs
 RUN pip install --upgrade pip==21.0.1
-COPY requirements.txt .
+COPY requirements/requirements.txt .
 RUN  pip --no-cache-dir install -r requirements.txt
 
 COPY . .
