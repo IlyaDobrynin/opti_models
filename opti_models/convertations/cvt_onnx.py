@@ -1,11 +1,14 @@
-import os
-import typing as t
-import onnx
-import torch
-import onnxruntime as ort
-from onnxsim import simplify
+#!/usr/bin/env python
 import argparse
 import logging
+import os
+import typing as t
+
+import onnx
+import onnxruntime as ort
+import torch
+from onnxsim import simplify
+
 from opti_models.utils.model_utils import get_model
 
 logging.basicConfig(level=logging.INFO)
@@ -29,24 +32,21 @@ def get_parameters(export_name: str, model_name: str, batch_size: int, in_size: 
 
 
 def make_onnx_convertation(
-        export_name: str,
-        batch_size: int,
-        model_name: str,
-        in_size: t.Tuple,
-        model_type: str,
-        num_classes: t.Optional[int] = 1000,
-        model_path: t.Optional[str] = None,
-        model: t.Optional[torch.nn.Module] = None,
-        verbose: t.Optional[bool] = False
+    export_name: str,
+    batch_size: int,
+    model_name: str,
+    in_size: t.Tuple,
+    model_type: str,
+    num_classes: t.Optional[int] = 1000,
+    model_path: t.Optional[str] = None,
+    model: t.Optional[torch.nn.Module] = None,
+    verbose: t.Optional[bool] = False,
 ):
     if verbose:
         logging.info("\tConvert to ONNX: START")
 
     export_path, export_simple_path, input_size = get_parameters(
-        export_name=export_name,
-        model_name=model_name,
-        batch_size=batch_size,
-        in_size=in_size
+        export_name=export_name, model_name=model_name, batch_size=batch_size, in_size=in_size
     )
     model = get_model(
         model_name=model_name,
@@ -54,7 +54,7 @@ def make_onnx_convertation(
         model_type=model_type,
         model=model,
         num_classes=num_classes,
-        model_path=model_path
+        model_path=model_path,
     )
     model.eval()
     dummy_input = torch.ones(input_size, device="cuda")
@@ -108,8 +108,9 @@ def make_onnx_convertation(
     try:
         ort_session = ort.InferenceSession(export_simple_path)
         outputs = ort_session.run(None, {"input": dummy_input.cpu().numpy()})
-    except:
+    except Exception as e:
         logging.info("\tCan\'t start onnxruntime session")
+        raise e
 
     if outputs[0].shape != dummy_output.shape:
         if os.path.exists(export_path):
@@ -141,7 +142,7 @@ def main(args):
         model_type=model_type,
         num_classes=num_classes,
         model_path=model_path,
-        verbose=verbose
+        verbose=verbose,
     )
 
 
@@ -149,8 +150,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description='ONNX conversion script')
     parser.add_argument('--model-name', type=str, help="Name of the model", required=True)
     parser.add_argument('--model-type', default='classifier', type=str, help="Type of the model")
-    parser.add_argument('--model-path', type=str, default='ImageNet', help="Path to the pretrained weights, or ImageNet,"
-                                                                     "if you want to get model with imagenet pretrain")
+    parser.add_argument(
+        '--model-path',
+        type=str,
+        default='ImageNet',
+        help="Path to the pretrained weights, or ImageNet," "if you want to get model with imagenet pretrain",
+    )
     parser.add_argument('--export-name', type=str, help="Name of the exported onnx file")
     parser.add_argument('--batch-size', type=int, default=1, help="Batch size for optimized model")
     parser.add_argument('--size', nargs='+', default=(3, 224, 224), type=int, help="Size of the input tensor")
