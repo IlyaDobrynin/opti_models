@@ -1,16 +1,24 @@
-import os
+#!/usr/bin/env python
+import logging
 import typing as t
+from argparse import ArgumentParser
+from time import time
+
+import cv2
 import numpy as np
 import pandas as pd
-from time import time
-from tqdm import tqdm
-import logging
-import tensorrt as trt
 import pycuda.driver as cuda
-from argparse import ArgumentParser
-from albumentations import Compose, Resize, Normalize
-import cv2
-from opti_models.utils.benchmarks_utils import compute_metrics, prepare_data, load_engine, allocate_buffers, get_shapes
+import tensorrt as trt
+from albumentations import Compose, Normalize, Resize
+from tqdm import tqdm
+
+from opti_models.utils.benchmarks_utils import (
+    allocate_buffers,
+    compute_metrics,
+    get_shapes,
+    load_engine,
+    prepare_data,
+)
 
 logging.basicConfig(level=logging.INFO)
 TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
@@ -33,27 +41,31 @@ class TensorRTBenchmark:
         self.numpy_array = np.zeros((self.max_batch_size, input_volume))
         self.batch_size = bs
 
-        self.augmentations = Compose([
-            Resize(
-                height=h,
-                width=w,
-                interpolation=cv2.INTER_AREA
-            ),
-            Normalize(),
-        ], p=1)
+        self.augmentations = Compose(
+            [
+                Resize(height=h, width=w, interpolation=cv2.INTER_AREA),
+                Normalize(),
+            ],
+            p=1,
+        )
 
     def _load_images(self, labels_df: pd.DataFrame, idx: int):
         idx_start = idx
         idx_stop = min(idx + self.max_batch_size, labels_df.shape[0])
         bs = idx_stop - idx_start
-        batch_df = labels_df.iloc[idx_start: idx_stop, :]
-        images = np.asarray([
-            np.array(
-                self.augmentations(image=cv2.cvtColor(cv2.imread(name), cv2.COLOR_BGR2RGB))['image'],
-                dtype=np.float32,
-                order='C'
-            ).transpose((2, 0, 1)).ravel() for name in batch_df['names'].values
-        ])
+        batch_df = labels_df.iloc[idx_start:idx_stop, :]
+        images = np.asarray(
+            [
+                np.array(
+                    self.augmentations(image=cv2.cvtColor(cv2.imread(name), cv2.COLOR_BGR2RGB))['image'],
+                    dtype=np.float32,
+                    order='C',
+                )
+                .transpose((2, 0, 1))
+                .ravel()
+                for name in batch_df['names'].values
+            ]
+        )
         names = [name for name in batch_df['names'].values]
         return images, names, bs
 
@@ -70,15 +82,11 @@ class TensorRTBenchmark:
             batch_time = time()
             np.copyto(self.inputs[0].host, image_batch.ravel())
             [cuda.memcpy_htod_async(inp.device, inp.host, self.stream) for inp in self.inputs]
-            self.context.execute_async(
-                batch_size=bs,
-                bindings=self.bindings,
-                stream_handle=self.stream.handle
-            )
+            self.context.execute_async(batch_size=bs, bindings=self.bindings, stream_handle=self.stream.handle)
             [cuda.memcpy_dtoh_async(out.host, out.device, self.stream) for out in self.outputs]
             self.stream.synchronize()
             preds = [out.host for out in self.outputs][0]
-            preds = np.asarray([preds[i: i + self.num_classes] for i in range(0, len(preds), self.num_classes)])
+            preds = np.asarray([preds[i : i + self.num_classes] for i in range(0, len(preds), self.num_classes)])
             avg_batch_time.append(time() - batch_time)
             preds_dict.update({name: label for name, label in zip(names, preds)})
         logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
@@ -91,8 +99,9 @@ class TensorRTBenchmark:
         preds_dict = self._inference_loop(labels_df=labels_df)
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
         for rank, rank_metric in zip(ranks, rank_metrics):
-            logging.info(f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}"
-                         f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}")
+            logging.info(
+                f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}" f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}"
+            )
         logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
 
 
@@ -101,7 +110,9 @@ def parse_args():
     path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
     parser = ArgumentParser(description='Simple speed benchmark, based on TRT models')
     parser.add_argument('--trt-path', required=True, type=str, help="Path to TRT model")
-    parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
+    parser.add_argument(
+        '--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}"
+    )
     return parser.parse_args()
 
 

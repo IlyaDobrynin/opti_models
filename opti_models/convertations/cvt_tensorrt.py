@@ -1,9 +1,11 @@
-import os
-import onnx
-import typing as t
-import tensorrt as trt
+#!/usr/bin/env python
 import argparse
 import logging
+import os
+import typing as t
+
+import onnx
+import tensorrt as trt
 
 logging.basicConfig(level=logging.INFO)
 TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
@@ -20,18 +22,18 @@ def save_engine(engine: trt.ICudaEngine, engine_dest_path: str):
 
 
 def build_engine(
-        uff_model_path: str,
-        trt_logger: trt.Logger,
-        trt_engine_datatype: trt.DataType = trt.DataType.FLOAT,
-        batch_size: int = 1,
-        verbose: bool = False
+    uff_model_path: str,
+    trt_logger: trt.Logger,
+    trt_engine_datatype: trt.DataType = trt.DataType.FLOAT,
+    batch_size: int = 1,
+    verbose: bool = False,
 ) -> trt.ICudaEngine:
 
     EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
-    with trt.Builder(trt_logger) as builder, \
-            builder.create_network(EXPLICIT_BATCH) as network, \
-            trt.OnnxParser(network, trt_logger) as parser:
+    with trt.Builder(trt_logger) as builder, builder.create_network(EXPLICIT_BATCH) as network, trt.OnnxParser(
+        network, trt_logger
+    ) as parser:
 
         builder.max_workspace_size = 1 << 30
 
@@ -70,19 +72,14 @@ def get_input_shape(model_path: str) -> t.Tuple:
     layer = model.graph.input[0]
     tensor_type = layer.type.tensor_type
     size = []
-    if (tensor_type.HasField("shape")):
+    if tensor_type.HasField("shape"):
         for d in tensor_type.shape.dim:
-            if (d.HasField("dim_value")):
+            if d.HasField("dim_value"):
                 size.append(d.dim_value)
     return tuple(size)
 
 
-def make_trt_convertation(
-        precision: str,
-        export_name: str,
-        onnx_model_path: str,
-        verbose: bool = True
-    ):
+def make_trt_convertation(precision: str, export_name: str, onnx_model_path: str, verbose: bool = True):
 
     if verbose:
         logging.info("\tConvert to TensorRT: START")
@@ -119,7 +116,7 @@ def make_trt_convertation(
             trt_logger=TRT_LOGGER,
             trt_engine_datatype=trt_datatype,
             batch_size=bs,
-            verbose=verbose
+            verbose=verbose,
         )
     except Exception as e:
         logging.info("\tTensorRT engine build: FAIL")
@@ -127,12 +124,13 @@ def make_trt_convertation(
     else:
         if verbose:
             logging.info(f"\t{sub_prefix}TensorRT engine build: SUCCESS")
-    
+
     # Save the engine to file
     try:
         save_engine(trt_engine, export_path)
-    except:
+    except Exception as e:
         logging.info(f"\t{sub_prefix}TensorRT engine save: FAIL")
+        raise e
     else:
         if verbose:
             logging.info(f"\t{sub_prefix}TensorRT engine save: SUCCESS")
@@ -146,10 +144,7 @@ def main(args):
     verbose = args.verbose
 
     make_trt_convertation(
-        precision=precision,
-        export_name=export_name,
-        onnx_model_path=onnx_model_path,
-        verbose=verbose
+        precision=precision, export_name=export_name, onnx_model_path=onnx_model_path, verbose=verbose
     )
 
 
