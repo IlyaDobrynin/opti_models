@@ -1,27 +1,31 @@
+#!/usr/bin/env python
+import logging
 import typing as t
+from argparse import ArgumentParser
+from time import time
+
 import numpy as np
 import pandas as pd
-from time import time
-from tqdm import tqdm
-import logging
 import torch
-from argparse import ArgumentParser
-from torch.utils.data import DataLoader
 from torch.nn import functional as F
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
 from opti_models.benchmarks.datasets import ImagenetDataset
 from opti_models.utils.benchmarks_utils import compute_metrics, prepare_data
 from opti_models.utils.model_utils import get_model
+
 logging.basicConfig(level=logging.INFO)
 
 
 class SimpleBenchmark:
     def __init__(
-            self,
-            model_name: str,
-            batch_size: t.Optional[int] = 1,
-            in_size: t.Tuple = (224, 224),
-            workers: t.Optional[int] = 1,
-            show_model_info: bool = False
+        self,
+        model_name: str,
+        batch_size: t.Optional[int] = 1,
+        in_size: t.Tuple = (224, 224),
+        workers: t.Optional[int] = 1,
+        show_model_info: bool = False,
     ):
         self.model_name = model_name
         self.batch_size = batch_size
@@ -37,7 +41,7 @@ class SimpleBenchmark:
             shuffle=False,
             num_workers=self.workers,
             collate_fn=dataset_obj.collate_fn,
-            pin_memory=True
+            pin_memory=True,
         )
         return dataloader
 
@@ -62,10 +66,7 @@ class SimpleBenchmark:
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
         labels_df = prepare_data(path_to_images=path_to_images)
         model = get_model(
-            model_type='classifier',
-            model_name=self.model_name,
-            model_path='ImageNet',
-            show=self.show_model_info
+            model_type='classifier', model_name=self.model_name, model_path='ImageNet', show=self.show_model_info
         )
         dataloader = self._make_dataloader(data_df=labels_df)
 
@@ -73,8 +74,9 @@ class SimpleBenchmark:
         preds_dict = self._inference_loop(dataloader=dataloader, model=model)
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
         for rank, rank_metric in zip(ranks, rank_metrics):
-            logging.info(f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}"
-                         f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}")
+            logging.info(
+                f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}" f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}"
+            )
         logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
 
 
@@ -84,7 +86,9 @@ def parse_args():
 
     parser = ArgumentParser(description='Simple speed benchmark, based on pyTorch models')
     parser.add_argument('--model-name', type=str, required=True, help="Name of the model to test", default='resnet18')
-    parser.add_argument('--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}")
+    parser.add_argument(
+        '--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}"
+    )
     parser.add_argument('--size', default=(224, 224), nargs='+', type=int, help="Input shape, default=(224, 224)")
     parser.add_argument('--batch-size', default=1, type=int, help="Size of the batch of images, default=1")
     parser.add_argument('--workers', default=1, type=int, help="Number of workers, default=1")
@@ -93,10 +97,7 @@ def parse_args():
 
 def main(args):
     bench_obj = SimpleBenchmark(
-        model_name=args.model_name,
-        batch_size=args.batch_size,
-        workers=args.workers,
-        in_size=args.size
+        model_name=args.model_name, batch_size=args.batch_size, workers=args.workers, in_size=args.size
     )
     bench_obj.process(path_to_images=args.path_to_images)
 
