@@ -2,25 +2,65 @@
 """
 Simple backbones factory
 """
-from . import (
-    # Torchvision models
-    resnet18, resnet34, resnet50, resnet101, resnet152,
-    vgg11, vgg11_bn, vgg13, vgg13_bn, vgg16, vgg16_bn, vgg19, vgg19_bn,
-    densenet121, densenet161, densenet169, densenet201,
+from . import (  # Torchvision models
+    densenet121,
+    densenet161,
+    densenet169,
+    densenet201,
+    efficientnet_b0,
+    efficientnet_b0b,
+    efficientnet_b0c,
+    efficientnet_b1,
+    efficientnet_b1b,
+    efficientnet_b1c,
+    efficientnet_b2b,
+    efficientnet_b2c,
+    efficientnet_b3b,
+    efficientnet_b3c,
+    efficientnet_b4b,
+    efficientnet_b4c,
+    efficientnet_b5b,
+    efficientnet_b5c,
+    efficientnet_b6b,
+    efficientnet_b6c,
+    efficientnet_b7b,
+    efficientnet_b7c,
+    efficientnet_b8c,
+    genet_large,
+    genet_normal,
+    genet_small,
     inception_v3,
-    resnext50_32x4d, resnext101_32x8d,
-    wide_resnet50_2, wide_resnet101_2,
-    mobilenetv2_w1, mobilenetv2_wd2, mobilenetv2_wd4, mobilenetv2_w3d4,
+    mixnet_l,
+    mixnet_m,
+    mixnet_s,
+    mnasnet0_5,
+    mnasnet0_75,
+    mnasnet1_0,
+    mnasnet1_3,
+    mobilenet_v2_,
+    mobilenetv2_w1,
+    mobilenetv2_w3d4,
+    mobilenetv2_wd2,
+    mobilenetv2_wd4,
     mobilenetv3_large_w1,
-    mixnet_s, mixnet_m, mixnet_l,
-    efficientnet_b0, efficientnet_b1,
-    efficientnet_b0b, efficientnet_b1b, efficientnet_b2b, efficientnet_b3b, efficientnet_b4b,
-    efficientnet_b5b, efficientnet_b6b, efficientnet_b7b,
-    efficientnet_b0c, efficientnet_b1c, efficientnet_b2c, efficientnet_b3c, efficientnet_b4c,
-    efficientnet_b5c, efficientnet_b6c, efficientnet_b7c, efficientnet_b8c,
-    genet_small, genet_normal, genet_large
+    resnet18,
+    resnet34,
+    resnet50,
+    resnet101,
+    resnet152,
+    resnext50_32x4d,
+    resnext101_32x8d,
+    vgg11,
+    vgg11_bn,
+    vgg13,
+    vgg13_bn,
+    vgg16,
+    vgg16_bn,
+    vgg19,
+    vgg19_bn,
+    wide_resnet50_2,
+    wide_resnet101_2,
 )
-
 
 BACKBONES = {
     # Torchvision models
@@ -46,19 +86,21 @@ BACKBONES = {
     'resnext101_32x8d': resnext101_32x8d,
     'wide_resnet50': wide_resnet50_2,
     'wide_resnet101': wide_resnet101_2,
-
+    'mobilenet_v2': mobilenet_v2_,
+    'mnasnet0_5': mnasnet0_5,
+    'mnasnet0_75': mnasnet0_75,
+    'mnasnet1_0': mnasnet1_0,
+    'mnasnet1_3': mnasnet1_3,
     # Mobilenets
     'mobilenetv2_w1': mobilenetv2_w1,
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
     'mobilenetv2_w3d4': mobilenetv2_w3d4,
     'mobilenetv3_large_w1': mobilenetv3_large_w1,
-
     # MixNet
     'mixnet_s': mixnet_s,
     'mixnet_m': mixnet_m,
     'mixnet_l': mixnet_l,
-
     # Efficientnets
     'efficientnet_b0': efficientnet_b0,
     'efficientnet_b1': efficientnet_b1,
@@ -79,7 +121,6 @@ BACKBONES = {
     'efficientnet_b6c': efficientnet_b6c,
     'efficientnet_b7c': efficientnet_b7c,
     'efficientnet_b8c': efficientnet_b8c,
-
     # Genets
     'genet_small': genet_small,
     'genet_normal': genet_normal,
@@ -88,7 +129,7 @@ BACKBONES = {
 
 
 def get_backbone(name, *args, **kwargs):
-    """ Function returns pytorch pretrained model with given args and kwargs
+    """Function returns pytorch pretrained model with given args and kwargs
     from the list of backbones
 
     :param name: Pretrained backbone name
