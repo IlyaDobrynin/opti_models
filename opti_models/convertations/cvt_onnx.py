@@ -73,7 +73,7 @@ def make_onnx_convertation(
             input_names=input_names,
             output_names=output_names,
             example_outputs=dummy_output,
-            opset_version=11,
+            opset_version=9,
             export_params=True,
         )
     except Exception as e:

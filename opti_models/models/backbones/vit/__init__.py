@@ -1,0 +1,1 @@
+from .swin.swin_transformer import swin_tiny_patch4_window7_224

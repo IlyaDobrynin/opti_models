@@ -50,6 +50,7 @@ from . import (  # Torchvision models
     resnet152,
     resnext50_32x4d,
     resnext101_32x8d,
+    swin_tiny_patch4_window7_224,
     vgg11,
     vgg11_bn,
     vgg13,
@@ -125,6 +126,8 @@ BACKBONES = {
     'genet_small': genet_small,
     'genet_normal': genet_normal,
     'genet_large': genet_large,
+    # Visual Transformers
+    'swin_tiny_patch4_window7_224': swin_tiny_patch4_window7_224,
 }
 
 
