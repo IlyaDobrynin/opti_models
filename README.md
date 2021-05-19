@@ -157,8 +157,10 @@ cvt-trt --onnx-path
 Parameters cheatsheet:
 
 - `onnx-path` (str, required) - Path to the exported onnx model.
-- `precision` (str, optional) - Precision of the TRT engine, 32 (for FP32) or 16 (for FP16). Default: `32`.
-- `export-name` (str, optional) - Name of the exported TRT engine . Default:c `{model-name}_prec-{precision}_res-{size}`.
+- `precision` (str, optional) - Precision of the TRT engine, 32 (for FP32), 16 (for FP16) or 8 (for INT8). Default: `32`.
+- `export-name` (str, optional) - Name of the exported TRT engine . Default: `{model_name}_prec-{precision}_bs-{bs}_res-{c}x{h}x{w}.engine`.
+- `calibration-images-dir` (str, optional) - Path to the directory with images for int8 calibration. If `precision==8`
+  this parameter required.
 
 **Example:**
 ```
