@@ -111,7 +111,11 @@ def parse_args():
     parser = ArgumentParser(description='Simple speed benchmark, based on TRT models')
     parser.add_argument('--trt-path', required=True, type=str, help="Path to TRT model")
     parser.add_argument(
-        '--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}"
+        '--path-to-images',
+        required=False,
+        type=str,
+        default=path,
+        help=f"Path to the validation images, default: {path}",
     )
     return parser.parse_args()
 
