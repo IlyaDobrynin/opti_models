@@ -9,6 +9,7 @@ import onnxruntime as ort
 import torch
 from onnxsim import simplify
 
+from opti_models.models.backbones.backbone_factory import show_available_backbones
 from opti_models.utils.model_utils import get_model
 
 logging.basicConfig(level=logging.INFO)
@@ -147,20 +148,30 @@ def main(args):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='ONNX conversion script')
-    parser.add_argument('--model-name', type=str, help="Name of the model", required=True)
-    parser.add_argument('--model-type', default='classifier', type=str, help="Type of the model")
+    parser = argparse.ArgumentParser(description='ONNX conversion parameters')
+    parser.add_argument(
+        '--model-name', type=str, required=True, help=f"Name of the model. Available: {show_available_backbones()}"
+    )
+    parser.add_argument(
+        '--model-type', default='classifier', type=str, help="Type of the model. Default 'classifier'."
+    )
     parser.add_argument(
         '--model-path',
         type=str,
         default='ImageNet',
-        help="Path to the pretrained weights, or ImageNet," "if you want to get model with imagenet pretrain",
+        help="Path to the pretrained weights, or ImageNet, " "if you want to get model with imagenet pretrain",
     )
-    parser.add_argument('--export-name', type=str, help="Name of the exported onnx file")
-    parser.add_argument('--batch-size', type=int, default=1, help="Batch size for optimized model")
-    parser.add_argument('--size', nargs='+', default=(3, 224, 224), type=int, help="Size of the input tensor")
-    parser.add_argument('--num-classes', default=1000, type=int, help="Number of output classes of the model")
-    parser.add_argument('--verbose', default=True, type=bool, help="Flag for showing information")
+    parser.add_argument('--export-name', type=str, required=False, help="Name of the exported onnx file")
+    parser.add_argument(
+        '--batch-size', type=int, required=False, default=1, help="Batch size for optimized model. Default 1."
+    )
+    parser.add_argument(
+        '--size', nargs='+', default=(3, 224, 224), type=int, help="Size of the input tensor. Default (3, 224, 224)."
+    )
+    parser.add_argument(
+        '--num-classes', default=1000, type=int, help="Number of output classes of the model. Default 1000."
+    )
+    parser.add_argument('--verbose', action='store_true', default=True, help="Flag to show out info. Default True.")
 
     return parser.parse_args()
 

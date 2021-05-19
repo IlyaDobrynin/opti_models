@@ -2,10 +2,10 @@
 import argparse
 import logging
 import os
-import typing as t
 
-import onnx
 import tensorrt as trt
+
+from opti_models.utils.convertations_utils import Int8EntropyCalibrator, get_input_shape
 
 logging.basicConfig(level=logging.INFO)
 TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
@@ -27,6 +27,9 @@ def build_engine(
     trt_engine_datatype: trt.DataType = trt.DataType.FLOAT,
     batch_size: int = 1,
     verbose: bool = False,
+    calibration_images_dir: str = None,
+    onnx_model_path: str = None,
+    preprocess_method: callable = None,
 ) -> trt.ICudaEngine:
 
     EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
@@ -35,11 +38,21 @@ def build_engine(
         network, trt_logger
     ) as parser:
 
-        builder.max_workspace_size = 1 << 30
+        config = builder.create_builder_config()
+        config.max_workspace_size = 1 << 30
+        builder.max_batch_size = batch_size
 
         if trt_engine_datatype == trt.DataType.HALF:
             builder.fp16_mode = True
-        builder.max_batch_size = batch_size
+        elif trt_engine_datatype == trt.DataType.INT8:
+            config.set_flag(trt.BuilderFlag.INT8)
+            config.int8_calibrator = Int8EntropyCalibrator(
+                cache_file="calibration.cache",
+                calibration_images_dir=calibration_images_dir,
+                batch_size=batch_size,
+                onnx_model_path=onnx_model_path,
+                preprocess_method=preprocess_method,
+            )
 
         with open(uff_model_path, 'rb') as model:
             if verbose:
@@ -51,36 +64,34 @@ def build_engine(
             logging.info(f"\t{sub_prefix}Num of network layers: {network.num_layers}")
             logging.info(f"\t{sub_prefix}Building TensorRT engine. This may take a while...")
 
-        return builder.build_cuda_engine(network)
+        return builder.build_engine(network, config)
 
 
-def run_checks(precision: str, onnx_model_path: str):
+def run_checks(precision: str, onnx_model_path: str, calibration_images_dir: str) -> trt.DataType:
     if not os.path.isfile(onnx_model_path):
         raise Exception('ONNX file does not exist. Check the path')
     if precision == '32':
         trt_datatype = trt.DataType.FLOAT
     elif precision == '16':
         trt_datatype = trt.DataType.HALF
+    elif precision == '8':
+        trt_datatype = trt.DataType.INT8
+        if (calibration_images_dir is None) or (not os.path.exists(calibration_images_dir)):
+            raise Exception('For INT8 convertation you need to provide calibration_images directory')
     else:
-        raise Exception('Wrong precision. Use either 32 of 16')
+        raise Exception('Wrong precision. Use either 32, 16, or 8')
 
     return trt_datatype
 
 
-def get_input_shape(model_path: str) -> t.Tuple:
-    model = onnx.load(model_path)
-    layer = model.graph.input[0]
-    tensor_type = layer.type.tensor_type
-    size = []
-    if tensor_type.HasField("shape"):
-        for d in tensor_type.shape.dim:
-            if d.HasField("dim_value"):
-                size.append(d.dim_value)
-    return tuple(size)
-
-
-def make_trt_convertation(precision: str, export_name: str, onnx_model_path: str, verbose: bool = True):
-
+def make_trt_convertation(
+    precision: str,
+    export_name: str,
+    onnx_model_path: str,
+    verbose: bool = True,
+    calibration_images_dir: str = None,
+    preprocess_method: callable = None,
+):
     if verbose:
         logging.info("\tConvert to TensorRT: START")
 
@@ -90,13 +101,15 @@ def make_trt_convertation(precision: str, export_name: str, onnx_model_path: str
     export_dir = os.path.join('data/trt-export', model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-    if not export_name:
+    if export_name is None:
         out_model_name = f"{model_name}_prec-{precision}_bs-{bs}_res-{c}x{h}x{w}.engine"
     else:
         out_model_name = f"{export_name}.engine"
     export_path = os.path.join(export_dir, out_model_name)
 
-    trt_datatype = run_checks(precision, onnx_model_path)
+    trt_datatype = run_checks(
+        precision=precision, onnx_model_path=onnx_model_path, calibration_images_dir=calibration_images_dir
+    )
     # We first load all custom plugins shipped with TensorRT,
     # some of them will be needed during inference
     trt.init_libnvinfer_plugins(TRT_LOGGER, '')
@@ -111,13 +124,26 @@ def make_trt_convertation(precision: str, export_name: str, onnx_model_path: str
     # alongside with UffParser to build TensorRT
     # engine. For more details, check implementation
     try:
-        trt_engine = build_engine(
-            uff_model_path=onnx_model_path,
-            trt_logger=TRT_LOGGER,
-            trt_engine_datatype=trt_datatype,
-            batch_size=bs,
-            verbose=verbose,
-        )
+        if trt_datatype != trt.DataType.INT8:
+            params = {
+                'uff_model_path': onnx_model_path,
+                'trt_logger': TRT_LOGGER,
+                'trt_engine_datatype': trt_datatype,
+                'batch_size': bs,
+                'verbose': verbose,
+            }
+        else:
+            params = {
+                'uff_model_path': onnx_model_path,
+                'trt_logger': TRT_LOGGER,
+                'trt_engine_datatype': trt_datatype,
+                'batch_size': bs,
+                'verbose': verbose,
+                'calibration_images_dir': calibration_images_dir,
+                'onnx_model_path': onnx_model_path,
+                'preprocess_method': preprocess_method,
+            }
+        trt_engine = build_engine(**params)
     except Exception as e:
         logging.info("\tTensorRT engine build: FAIL")
         raise e
@@ -142,18 +168,44 @@ def main(args):
     precision = args.precision
     export_name = args.export_name
     verbose = args.verbose
+    calibration_images_dir = args.calibration_images_dir
 
     make_trt_convertation(
-        precision=precision, export_name=export_name, onnx_model_path=onnx_model_path, verbose=verbose
+        precision=precision,
+        export_name=export_name,
+        onnx_model_path=onnx_model_path,
+        verbose=verbose,
+        calibration_images_dir=calibration_images_dir,
     )
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='TRT params')
-    parser.add_argument('--onnx-path', type=str, required=True)
-    parser.add_argument('--export-name', type=str)
-    parser.add_argument('--precision', default="32", type=str)
-    parser.add_argument('--verbose', type=bool, default=True)
+    parser = argparse.ArgumentParser(description='TRT conversion parameters')
+    parser.add_argument('--onnx-path', type=str, required=True, help='Path to ONNX file')
+    parser.add_argument(
+        '--export-name',
+        type=str,
+        required=False,
+        default=None,
+        help="Output name. Default {model_name}_prec-{precision}_bs-{bs}_res-{c}x{h}x{w}.engine",
+    )
+    parser.add_argument(
+        '--precision',
+        required=False,
+        default="32",
+        type=str,
+        help="Precision for the trt model: 32, 16 or 8. Default 32.",
+    )
+    parser.add_argument(
+        '--verbose', action='store_true', default=True, required=False, help="Flag to show out info. Default True."
+    )
+    parser.add_argument(
+        '--calibration-images-dir',
+        type=str,
+        default=None,
+        required=False,
+        help="Path to calibraton images directory (required for precision=8). Default None.",
+    )
 
     return parser.parse_args()
 
@@ -161,5 +213,3 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     main(args=args)
-
-    # cvt_all()
