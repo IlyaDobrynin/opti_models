@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from opti_models.benchmarks.datasets import ImagenetDataset
+from opti_models.models.backbones.backbone_factory import show_available_backbones
 from opti_models.utils.benchmarks_utils import compute_metrics, prepare_data
 from opti_models.utils.model_utils import get_model
 
@@ -85,13 +86,26 @@ def parse_args():
     path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
 
     parser = ArgumentParser(description='Simple speed benchmark, based on pyTorch models')
-    parser.add_argument('--model-name', type=str, required=True, help="Name of the model to test", default='resnet18')
     parser.add_argument(
-        '--path-to-images', default=path, type=str, help=f"Path to the validation images, default: {path}"
+        '--model-name',
+        type=str,
+        required=True,
+        help=f"Name of the model to test. Available: {show_available_backbones()}",
     )
-    parser.add_argument('--size', default=(224, 224), nargs='+', type=int, help="Input shape, default=(224, 224)")
-    parser.add_argument('--batch-size', default=1, type=int, help="Size of the batch of images, default=1")
-    parser.add_argument('--workers', default=1, type=int, help="Number of workers, default=1")
+    parser.add_argument(
+        '--path-to-images',
+        default=path,
+        required=False,
+        type=str,
+        help=f"Path to the validation images. Default: {path}.",
+    )
+    parser.add_argument(
+        '--size', default=(224, 224), required=False, nargs='+', type=int, help="Input shape. Default = (224, 224)."
+    )
+    parser.add_argument(
+        '--batch-size', default=1, required=False, type=int, help="Size of the batch of images. Default = 1."
+    )
+    parser.add_argument('--workers', default=1, required=False, type=int, help="Number of workers. Default = 1.")
     return parser.parse_args()
 
 
