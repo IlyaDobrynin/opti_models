@@ -2,7 +2,7 @@
 import logging
 import typing as t
 from argparse import ArgumentParser
-from time import time
+from time import perf_counter
 
 import cv2
 import numpy as np
@@ -26,6 +26,11 @@ TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 
 class TensorRTBenchmark:
     def __init__(self, trt_path: str):
+        """Class for simple TensorRT benchmarking
+
+        Args:
+            trt_path: Path to converted TensorRT model
+        """
         self.model_name = trt_path.split("/")[-2]
 
         self.trt_runtime = trt.Runtime(TRT_LOGGER)
@@ -49,7 +54,7 @@ class TensorRTBenchmark:
             p=1,
         )
 
-    def _load_images(self, labels_df: pd.DataFrame, idx: int):
+    def _load_images(self, labels_df: pd.DataFrame, idx: int) -> t.Tuple[np.ndarray, t.List, int]:
         idx_start = idx
         idx_stop = min(idx + self.max_batch_size, labels_df.shape[0])
         bs = idx_stop - idx_start
@@ -69,7 +74,7 @@ class TensorRTBenchmark:
         names = [name for name in batch_df['names'].values]
         return images, names, bs
 
-    def _inference_loop(self, labels_df: pd.DataFrame):
+    def _inference_loop(self, labels_df: pd.DataFrame) -> t.Dict:
         preds_dict = {}
         avg_batch_time = []
         for idx in tqdm(range(0, labels_df.shape[0], self.max_batch_size)):
@@ -79,7 +84,7 @@ class TensorRTBenchmark:
             if bs != self.max_batch_size:
                 continue
 
-            batch_time = time()
+            start = perf_counter()
             np.copyto(self.inputs[0].host, image_batch.ravel())
             [cuda.memcpy_htod_async(inp.device, inp.host, self.stream) for inp in self.inputs]
             self.context.execute_async(batch_size=bs, bindings=self.bindings, stream_handle=self.stream.handle)
@@ -87,9 +92,10 @@ class TensorRTBenchmark:
             self.stream.synchronize()
             preds = [out.host for out in self.outputs][0]
             preds = np.asarray([preds[i : i + self.num_classes] for i in range(0, len(preds), self.num_classes)])
-            avg_batch_time.append(time() - batch_time)
+            end = perf_counter()
+            avg_batch_time.append(end - start)
             preds_dict.update({name: label for name, label in zip(names, preds)})
-        logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
+        logging.info(f"\tAverage images per second: {self.batch_size / np.mean(avg_batch_time):.4f} image/s")
         return preds_dict
 
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
@@ -128,5 +134,3 @@ def main(args):
 if __name__ == '__main__':
     args = parse_args()
     main(args)
-
-    # bench_all()

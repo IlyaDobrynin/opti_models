@@ -3,20 +3,20 @@ To get list of available models via python API, you can do:
 ```
 from opti_models.models.backbones.backbone_factory import show_available_backbones
 model_names = show_available_backbones()
-```                                     
+```
 ## Usecases
 By default, you can use any name from lists below, to convert this model.
 
-For example, if you want to convert to ONNX `densenet121` with batch_size = 100 and 
+For example, if you want to convert to ONNX `densenet121` with batch_size = 100 and
 number of output classes = 10, you need tu run:
 ```
-python opti_models/convertations/cvt_onnx.py --model-name densenet121 --model-path CKPT-PATH --batch_size 100 --num-classes 10
+cvt-onnx --model-name densenet121 --model-path CKPT-PATH --batch_size 100 --num-classes 10
 ```
 where `CKPT-PATH` - path to the pretrained weights.
 
 Next, if you want to make TensorRT convertation from this ONNX model, run:
 ```
-python opti_models/convertations/cvt_tensorrt.py --onnx-path data/onnx_export/resnet18/resnet18_bs-100_res-3x224x224_simplified.onnx
+cvt-trt --onnx-path data/onnx_export/resnet18/resnet18_bs-100_res-3x224x224_simplified.onnx
 ```
 
 ## Full list of backbones:

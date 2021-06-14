@@ -22,8 +22,7 @@ Repo for the easy-way models convertation.
 
 0. Clone the repo:
 ```
-git clone git@github.com:IlyaDobrynin/opti_models.git && cd opti_models
-git checkout dev
+git clone https://github.com/IlyaDobrynin/opti_models.git && cd opti_models
 ```
 ### With Docker
 [Back to Content](#Content)

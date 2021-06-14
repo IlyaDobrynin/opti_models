@@ -14,7 +14,7 @@ def parse_args():
         '--model-path',
         type=str,
         default='ImageNet',
-        help="Path to the pretrained weights, or ImageNet," "if you want to get model with imagenet pretrain",
+        help="Path to the pretrained weights, or ImageNet, if you want to get model with imagenet pretrain",
     )
     parser.add_argument('--export-dir', type=str, default='data/onnx-export', help="Path to directory to save results")
     parser.add_argument('--batch-size', type=int, default=1, help="Batch size for optimized model")

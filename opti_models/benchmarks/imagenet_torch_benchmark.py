@@ -2,7 +2,7 @@
 import logging
 import typing as t
 from argparse import ArgumentParser
-from time import time
+from time import perf_counter
 
 import numpy as np
 import pandas as pd
@@ -19,7 +19,7 @@ from opti_models.utils.model_utils import get_model
 logging.basicConfig(level=logging.INFO)
 
 
-class SimpleBenchmark:
+class TorchBenchmark:
     def __init__(
         self,
         model_name: str,
@@ -28,13 +28,22 @@ class SimpleBenchmark:
         workers: t.Optional[int] = 1,
         show_model_info: bool = False,
     ):
+        """Class for simple torch benchmarking
+
+        Args:
+            model_name: Name of the model to bench
+            batch_size: Batch size
+            in_size: Image input size
+            workers: Number of workers in dataloader
+            show_model_info: Flag to chow model info
+        """
         self.model_name = model_name
         self.batch_size = batch_size
         self.workers = workers
         self.in_size = in_size
         self.show_model_info = show_model_info
 
-    def _make_dataloader(self, data_df: pd.DataFrame):
+    def _make_dataloader(self, data_df: pd.DataFrame) -> DataLoader:
         dataset_obj = ImagenetDataset(data_df=data_df, in_size=self.in_size)
         dataloader = DataLoader(
             dataset=dataset_obj,
@@ -46,22 +55,33 @@ class SimpleBenchmark:
         )
         return dataloader
 
-    def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module):
+    @staticmethod
+    def _prediction_step(model: torch.nn.Module, inputs: torch.Tensor) -> torch.Tensor:
+        preds = model(inputs)
+        preds = F.softmax(preds, dim=-1)
+        return preds
+
+    def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module) -> t.Dict:
         preds_dict = {}
         avg_batch_time = []
+
+        torch.cuda.synchronize()
         model.eval()
         for batch in tqdm(dataloader, total=len(dataloader)):
             inputs = batch[0].cuda()
             names = batch[2]
-
-            batch_time = time()
-            preds = model(inputs)
-            preds = F.softmax(preds, dim=-1)
-            avg_batch_time.append(time() - batch_time)
+            start = perf_counter()
+            preds = self._prediction_step(model=model, inputs=inputs)
+            torch.cuda.synchronize()
+            end = perf_counter()
+            time = end - start
+            avg_batch_time.append(time)
 
             preds = preds.data.cpu().numpy()
             preds_dict.update({name: label for name, label in zip(names, preds)})
-        logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
+
+        logging.info(f"\tAverage images per second: {self.batch_size / np.mean(avg_batch_time):.4f} image/s")
+        logging.info(f"\tAverage second for image: {np.mean(avg_batch_time) * 1000:.4f} ms")
         return preds_dict
 
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
@@ -110,7 +130,7 @@ def parse_args():
 
 
 def main(args):
-    bench_obj = SimpleBenchmark(
+    bench_obj = TorchBenchmark(
         model_name=args.model_name, batch_size=args.batch_size, workers=args.workers, in_size=args.size
     )
     bench_obj.process(path_to_images=args.path_to_images)

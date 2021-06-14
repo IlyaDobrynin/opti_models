@@ -159,7 +159,7 @@ def parse_args():
         '--model-path',
         type=str,
         default='ImageNet',
-        help="Path to the pretrained weights, or ImageNet, " "if you want to get model with imagenet pretrain",
+        help="Path to the pretrained weights, or ImageNet, if you want to get model with imagenet pretrain",
     )
     parser.add_argument('--export-name', type=str, required=False, help="Name of the exported onnx file")
     parser.add_argument(
