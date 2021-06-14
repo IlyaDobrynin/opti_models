@@ -17,6 +17,7 @@ def parse_args():
         help="Path to the pretrained weights, or ImageNet, if you want to get model with imagenet pretrain",
     )
     parser.add_argument('--export-dir', type=str, default='data/onnx-export', help="Path to directory to save results")
+    parser.add_argument('--export-name', type=str, required=False, help="Name of the exported onnx file")
     parser.add_argument('--batch-size', type=int, default=1, help="Batch size for optimized model")
     parser.add_argument('--size', nargs='+', default=(3, 224, 224), type=int, help="Size of the input tensor")
     parser.add_argument('--num-classes', default=1000, type=int, help="Number of output classes of the model")
