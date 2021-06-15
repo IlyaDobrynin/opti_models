@@ -8,7 +8,6 @@ import tensorrt as trt
 from opti_models.utils.convertations_utils import Int8EntropyCalibrator, get_input_shape
 
 logging.basicConfig(level=logging.INFO)
-TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 sub_prefix = ">>>>> "
 
 __all__ = ["make_trt_convertation"]
@@ -38,15 +37,17 @@ def build_engine(
         network, trt_logger
     ) as parser:
 
-        config = builder.create_builder_config()
-        config.max_workspace_size = 1 << 30
+        # config = builder.create_builder_config()
+        # config.max_workspace_size = 1 << 30
+        builder.max_workspace_size = 1 << 30
         builder.max_batch_size = batch_size
 
         if trt_engine_datatype == trt.DataType.HALF:
             builder.fp16_mode = True
         elif trt_engine_datatype == trt.DataType.INT8:
-            config.set_flag(trt.BuilderFlag.INT8)
-            config.int8_calibrator = Int8EntropyCalibrator(
+            # builder.set_flag(trt.BuilderFlag.INT8)
+            builder.int8_mode = True
+            builder.int8_calibrator = Int8EntropyCalibrator(
                 cache_file="calibration.cache",
                 calibration_images_dir=calibration_images_dir,
                 batch_size=batch_size,
@@ -64,7 +65,9 @@ def build_engine(
             logging.info(f"\t{sub_prefix}Num of network layers: {network.num_layers}")
             logging.info(f"\t{sub_prefix}Building TensorRT engine. This may take a while...")
 
-        return builder.build_engine(network, config)
+        engine = builder.build_cuda_engine(network)
+
+        return engine
 
 
 def run_checks(precision: str, onnx_model_path: str, calibration_images_dir: str) -> trt.DataType:
@@ -106,6 +109,8 @@ def make_trt_convertation(
     else:
         out_model_name = f"{export_name}.engine"
     export_path = os.path.join(export_dir, out_model_name)
+
+    TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 
     trt_datatype = run_checks(
         precision=precision, onnx_model_path=onnx_model_path, calibration_images_dir=calibration_images_dir
