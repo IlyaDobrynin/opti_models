@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import pycuda.driver as cuda
 import tensorrt as trt
+import torch.cuda
 from albumentations import Compose, Normalize, Resize
 from tqdm import tqdm
 
@@ -93,6 +94,7 @@ class TensorRTBenchmark:
             preds = [out.host for out in self.outputs][0]
             preds = np.asarray([preds[i : i + self.num_classes] for i in range(0, len(preds), self.num_classes)])
             end = perf_counter()
+
             avg_batch_time.append(end - start)
             preds_dict.update({name: label for name, label in zip(names, preds)})
         logging.info(f"\tAverage images per second: {self.batch_size / np.mean(avg_batch_time):.4f} image/s")
@@ -129,6 +131,8 @@ def parse_args():
 def main(args):
     bench_obj = TensorRTBenchmark(trt_path=args.trt_path)
     bench_obj.process(path_to_images=args.path_to_images)
+    del bench_obj
+    torch.cuda.empty_cache()
 
 
 if __name__ == '__main__':

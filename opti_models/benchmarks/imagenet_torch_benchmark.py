@@ -134,6 +134,8 @@ def main(args):
         model_name=args.model_name, batch_size=args.batch_size, workers=args.workers, in_size=args.size
     )
     bench_obj.process(path_to_images=args.path_to_images)
+    del bench_obj
+    torch.cuda.empty_cache()
 
 
 if __name__ == '__main__':

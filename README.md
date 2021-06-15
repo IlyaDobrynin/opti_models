@@ -73,9 +73,9 @@ source venv/bin/activate
 2. Install dependencies
 ````
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements/requirements.txt
 pip install nvidia-pyindex
-pip install --upgrade nvidia-tensorrt
+pip install nvidia-tensorrt==7.2.2.3
 pip install -e .
 ````
 

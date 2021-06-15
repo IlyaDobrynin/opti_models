@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 
 from opti_models.convertations.cvt_onnx import main
 
@@ -29,7 +30,13 @@ def parse_args():
 def cvt_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
 
-    model_names = [name for name in show_available_backbones()]
+    excluded_names = []
+    onnx_export = 'data/onnx-export'
+    model_names = [
+        name
+        for name in show_available_backbones()
+        if (name not in excluded_names) and (name not in os.listdir(onnx_export))
+    ]
     for i, model_name in enumerate(model_names):
         logging.info(f"\t{i + 1}/{len(model_names)} - {model_name.upper()} CONVERT")
         args = parse_args()
@@ -38,8 +45,12 @@ def cvt_all():
             args.size = (3, 256, 256)
         elif model_name == 'inception_v3':
             args.size = (3, 299, 299)
-        main(args=args)
-        logging.info(f"-" * 100)
+
+        try:
+            main(args=args)
+            logging.info(f"-" * 100)
+        except Exception as e:
+            logging.info(f"\tCan't convert model: {model_name}\n{repr(e)}")
 
 
 if __name__ == '__main__':

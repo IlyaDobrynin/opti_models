@@ -2,7 +2,7 @@ opencv-python>=4.1.0.25
 torchsummary==1.5.1
 numpy>=1.15.4
 pandas>=0.23.4
-albumentations==0.4.0
+albumentations==0.5.2
 tqdm>=4.28.1
 onnx==1.7.0
 onnxruntime==1.5.2
