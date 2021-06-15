@@ -8,6 +8,7 @@ docker container run\
     --gpus all\
     --ipc host\
     --name ntech_train\
+    -p 6006:6006\
+    -p 8888:8888\
     -v ${PROJECT_DIR}:/workspace\
-    -v ${STORAGE}:/usr/local/opti_models\
     opti_models:${VERSION}
