@@ -22,22 +22,22 @@ def bench_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
 
     excluded_names = [
-        # 'efficientnet_b1b',
-        # 'efficientnet_b2b',
-        # 'efficientnet_b3b',
-        # 'efficientnet_b4b',
-        # 'efficientnet_b5b',
-        # 'efficientnet_b6b',
-        # 'efficientnet_b7b',
-        # 'efficientnet_b0c',
-        # 'efficientnet_b1c',
-        # 'efficientnet_b2c',
-        # 'efficientnet_b3c',
-        # 'efficientnet_b4c',
-        # 'efficientnet_b5c',
-        # 'efficientnet_b6c',
-        # 'efficientnet_b7c',
-        # 'efficientnet_b8c',
+        'efficientnet_b1b',
+        'efficientnet_b2b',
+        'efficientnet_b3b',
+        'efficientnet_b4b',
+        'efficientnet_b5b',
+        'efficientnet_b6b',
+        'efficientnet_b7b',
+        'efficientnet_b0c',
+        'efficientnet_b1c',
+        'efficientnet_b2c',
+        'efficientnet_b3c',
+        'efficientnet_b4c',
+        'efficientnet_b5c',
+        'efficientnet_b6c',
+        'efficientnet_b7c',
+        'efficientnet_b8c',
     ]
     trt_models_path = "data/trt-export"
     model_names = [
@@ -46,7 +46,7 @@ def bench_all():
         if (name not in excluded_names) and (name in os.listdir(trt_models_path))
     ]
     for i, model_name in enumerate(model_names):
-        logging.info(f"\t{i + 1}/{len(model_names)}")
+        logging.info(f"\t{i + 1}/{len(model_names)}: {model_name.upper()}")
         trt_model_path = os.path.join(trt_models_path, model_name)
         trt_model_names = [f for f in os.listdir(trt_model_path) if f.endswith(".engine")]
         for trt_model_name in trt_model_names:

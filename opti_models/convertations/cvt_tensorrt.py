@@ -3,6 +3,7 @@ import argparse
 import gc
 import logging
 import os
+import typing as t
 
 import tensorrt as trt
 
@@ -30,7 +31,11 @@ def build_engine(
     calibration_images_dir: str = None,
     onnx_model_path: str = None,
     preprocess_method: callable = None,
+    dynamic_range_json: str = None,
+    dummy_dynamic_range: t.Tuple = (-4, 4),
 ) -> trt.ICudaEngine:
+
+    assert dummy_dynamic_range is None, f"Dummy dunamic range currently not implemented"
 
     EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
@@ -62,6 +67,13 @@ def build_engine(
         if verbose:
             logging.info(f"\t{sub_prefix}Num of network layers: {network.num_layers}")
             logging.info(f"\t{sub_prefix}Building TensorRT engine. This may take a while...")
+
+        if trt_engine_datatype == trt.DataType.INT8:
+            for i in range(len(network)):
+                layer = network[i]
+                for j in range(layer.num_outputs):
+                    tensor = layer.get_output(j)
+                    tensor.dynamic_range = dummy_dynamic_range
 
         engine = builder.build_cuda_engine(network)
 

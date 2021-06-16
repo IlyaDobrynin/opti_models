@@ -31,7 +31,13 @@ def get_input_shape(model_path: str) -> t.Tuple:
 
 def load_data(data_dir: str, onnx_model_path: str, preprocess_method: callable = None):
     bs, c, h, w = get_input_shape(model_path=onnx_model_path)
-    image_paths = [os.path.join(data_dir, x) for x in os.listdir(data_dir)]
+
+    image_paths = []
+    for root_dir, folders, files in os.walk(data_dir):
+        if len(files) > 0:
+            image_paths += [os.path.join(root_dir, file) for file in files]
+
+    # image_paths = [os.path.join(data_dir, x) for x in os.listdir(data_dir)]
     logging.info(f"\tNumber of calibration images: {len(image_paths)}")
     batches = np.zeros(shape=(len(image_paths), c, h, w), dtype=np.float32)
     if preprocess_method is None:
