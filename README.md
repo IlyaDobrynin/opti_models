@@ -49,13 +49,32 @@ and place in to the `/usr/local/opti_models` directory. Details [here](#1-prepar
 4. Run docker container:
     - Without mounting data folder for benchmarks:
         ```
-        docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -it opti_models
+        bash run_docker_no-images.sh <PROJECT_DIR> <CONTAINER_VERSION:-latest>
+
+        or
+
+        docker run \
+           --gpus all \
+           --ipc=host \
+           -v <PROJECT_DIR>:/workspace \
+           -it opti_models
         ```
     - With mounting data folder for benchmarks (only if you have step 3 done):
         ```
-        docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -v /usr/local/opti_models/:/usr/local/opti_models/ -it opti_models
+        bash run_docker.sh <PROJECT_DIR> <CONTAINER_VERSION:-latest> <STORAGE:-/usr/local/opti_models>
+
+        or
+
+        docker run \
+           --gpus all \
+           --ipc=host \
+           -v <PROJECT_DIR>:/workspace \
+           -v <STORAGE>:/usr/local/opti_models/ \
+           -it opti_models
         ```
-    Where PROJECT_DIR is the directory, where opti_models is located
+    Where <PROJECT_DIR> - directory, where opti_models is located
+          <CONTAINER_VERSION> - version of the container, default - latest
+          <STORAGE> - directory with the calibration and validation images, default - /usr/local/opti_models
 
 </details>
 

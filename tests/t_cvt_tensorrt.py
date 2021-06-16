@@ -31,7 +31,8 @@ def cvt_all():
     onnx_models = "data/onnx-export"
     for i, model_name in enumerate(model_names):
         logging.info(f"\t{i + 1}/{len(model_names)} - {model_name.upper()} CONVERT")
-        precisions = ['32', '16', '8']
+        # precisions = ['32', '16', '8']
+        precisions = ['32', '16']
         for precision in precisions:
             logging.info(f"\tPRECISION: {precision} -------------")
             onnx_model_folder = os.path.join(onnx_models, model_name)

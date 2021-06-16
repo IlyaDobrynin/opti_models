@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import gc
 import logging
 import os
 
@@ -166,6 +167,11 @@ def make_trt_convertation(
         if verbose:
             logging.info(f"\t{sub_prefix}TensorRT engine save: SUCCESS")
             logging.info("\tConvert to TensorRT: SUCCESS")
+
+    # Clean
+    trt_engine.__del__()
+    del TRT_LOGGER, trt_engine
+    gc.collect()
 
 
 def main(args):

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import gc
 import logging
 import typing as t
 from argparse import ArgumentParser
@@ -9,7 +10,6 @@ import numpy as np
 import pandas as pd
 import pycuda.driver as cuda
 import tensorrt as trt
-import torch.cuda
 from albumentations import Compose, Normalize, Resize
 from tqdm import tqdm
 
@@ -97,6 +97,7 @@ class TensorRTBenchmark:
 
             avg_batch_time.append(end - start)
             preds_dict.update({name: label for name, label in zip(names, preds)})
+            del preds
         logging.info(f"\tAverage images per second: {self.batch_size / np.mean(avg_batch_time):.4f} image/s")
         return preds_dict
 
@@ -111,6 +112,10 @@ class TensorRTBenchmark:
                 f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}" f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}"
             )
         logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
+
+        # Clean
+        del self.trt_engine, self.context, self.trt_runtime, self.inputs, self.outputs, self.bindings, self.stream
+        gc.collect()
 
 
 def parse_args():
@@ -131,8 +136,6 @@ def parse_args():
 def main(args):
     bench_obj = TensorRTBenchmark(trt_path=args.trt_path)
     bench_obj.process(path_to_images=args.path_to_images)
-    del bench_obj
-    torch.cuda.empty_cache()
 
 
 if __name__ == '__main__':

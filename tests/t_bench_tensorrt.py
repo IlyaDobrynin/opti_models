@@ -53,7 +53,6 @@ def bench_all():
             name_list = trt_model_name.split("_")
             precision = None
             for n in name_list:
-                print(n, n.startswith('prec'))
                 if n.startswith("prec"):
                     precision = n.split("-")[1]
 

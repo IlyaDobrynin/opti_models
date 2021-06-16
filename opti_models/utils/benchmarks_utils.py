@@ -1,10 +1,11 @@
 import os
 import typing as t
+
 import numpy as np
 import pandas as pd
-import tensorrt as trt
 import pycuda.autoinit
 import pycuda.driver as cuda
+import tensorrt as trt
 
 
 class HostDeviceMem:
@@ -23,7 +24,6 @@ def load_engine(trt_runtime, engine_path):
     with open(engine_path, 'rb') as f:
         engine_data = f.read()
     engine = trt_runtime.deserialize_cuda_engine(engine_data)
-    print(engine)
     return engine
 
 
@@ -100,11 +100,7 @@ def top_n_accuracy(preds: t.List, truths: t.List, n: int):
     return float(successes) / len(truths)
 
 
-def compute_metrics(
-        trues_df: pd.DataFrame,
-        preds: t.Dict,
-        top_n_ranks: t.Tuple = (1, 5)
-):
+def compute_metrics(trues_df: pd.DataFrame, preds: t.Dict, top_n_ranks: t.Tuple = (1, 5)):
     true_labels = []
     pred_labels = []
     for name in preds.keys():
