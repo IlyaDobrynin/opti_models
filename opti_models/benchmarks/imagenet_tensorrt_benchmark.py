@@ -114,6 +114,8 @@ class TensorRTBenchmark:
         logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
 
         # Clean
+        self.context.__del__()
+        self.trt_engine.__del__()
         del self.trt_engine, self.context, self.trt_runtime, self.inputs, self.outputs, self.bindings, self.stream
         gc.collect()
 
@@ -136,6 +138,8 @@ def parse_args():
 def main(args):
     bench_obj = TensorRTBenchmark(trt_path=args.trt_path)
     bench_obj.process(path_to_images=args.path_to_images)
+    del bench_obj
+    gc.collect()
 
 
 if __name__ == '__main__':

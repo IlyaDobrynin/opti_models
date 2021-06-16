@@ -38,15 +38,12 @@ def build_engine(
         network, trt_logger
     ) as parser:
 
-        # config = builder.create_builder_config()
-        # config.max_workspace_size = 1 << 30
         builder.max_workspace_size = 1 << 30
         builder.max_batch_size = batch_size
 
         if trt_engine_datatype == trt.DataType.HALF:
             builder.fp16_mode = True
         elif trt_engine_datatype == trt.DataType.INT8:
-            # builder.set_flag(trt.BuilderFlag.INT8)
             builder.int8_mode = True
             builder.int8_calibrator = Int8EntropyCalibrator(
                 cache_file="calibration.cache",
