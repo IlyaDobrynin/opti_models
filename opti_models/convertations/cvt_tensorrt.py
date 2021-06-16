@@ -35,7 +35,7 @@ def build_engine(
     dummy_dynamic_range: t.Tuple = (-4, 4),
 ) -> trt.ICudaEngine:
 
-    assert dummy_dynamic_range is None, f"Dummy dunamic range currently not implemented"
+    assert dynamic_range_json is None, f"Dummy dunamic range currently not implemented"
 
     EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
