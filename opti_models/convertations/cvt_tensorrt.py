@@ -29,13 +29,9 @@ def build_engine(
     batch_size: int = 1,
     verbose: bool = False,
     calibration_images_dir: str = None,
-    onnx_model_path: str = None,
     preprocess_method: callable = None,
-    dynamic_range_json: str = None,
-    dummy_dynamic_range: t.Tuple = (-4, 4),
+    export_dir: str = None,
 ) -> trt.ICudaEngine:
-
-    assert dynamic_range_json is None, f"Dummy dunamic range currently not implemented"
 
     EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
@@ -51,10 +47,10 @@ def build_engine(
         elif trt_engine_datatype == trt.DataType.INT8:
             builder.int8_mode = True
             builder.int8_calibrator = Int8EntropyCalibrator(
-                cache_file="calibration.cache",
+                cache_file=os.path.join(export_dir, "int8_calibration.cache"),
                 calibration_images_dir=calibration_images_dir,
                 batch_size=batch_size,
-                onnx_model_path=onnx_model_path,
+                onnx_model_path=uff_model_path,
                 preprocess_method=preprocess_method,
             )
 
@@ -67,13 +63,6 @@ def build_engine(
         if verbose:
             logging.info(f"\t{sub_prefix}Num of network layers: {network.num_layers}")
             logging.info(f"\t{sub_prefix}Building TensorRT engine. This may take a while...")
-
-        if trt_engine_datatype == trt.DataType.INT8:
-            for i in range(len(network)):
-                layer = network[i]
-                for j in range(layer.num_outputs):
-                    tensor = layer.get_output(j)
-                    tensor.dynamic_range = dummy_dynamic_range
 
         engine = builder.build_cuda_engine(network)
 
@@ -155,8 +144,8 @@ def make_trt_convertation(
                 'batch_size': bs,
                 'verbose': verbose,
                 'calibration_images_dir': calibration_images_dir,
-                'onnx_model_path': onnx_model_path,
                 'preprocess_method': preprocess_method,
+                'export_dir': export_dir,
             }
         trt_engine = build_engine(**params)
     except Exception as e:

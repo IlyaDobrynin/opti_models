@@ -48,7 +48,7 @@ class TorchBenchmark:
         self.show_model_info = show_model_info
 
     def _make_dataloader(self, data_df: pd.DataFrame) -> DataLoader:
-        dataset_obj = ImagenetDataset(data_df=data_df[:100], in_size=self.in_size)
+        dataset_obj = ImagenetDataset(data_df=data_df, in_size=self.in_size)
         dataloader = DataLoader(
             dataset=dataset_obj,
             batch_size=self.batch_size,

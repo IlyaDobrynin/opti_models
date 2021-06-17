@@ -82,8 +82,7 @@ class TensorRTBenchmark:
     def _inference_loop(self, labels_df: pd.DataFrame) -> t.Dict:
         preds_dict = {}
         avg_batch_time = []
-        # for idx in tqdm(range(0, labels_df.shape[0], self.max_batch_size)):
-        for idx in tqdm(range(0, 100, self.max_batch_size)):
+        for idx in tqdm(range(0, labels_df.shape[0], self.max_batch_size)):
             image_batch, names, bs = self._load_images(labels_df=labels_df, idx=idx)
 
             # TODO: remove this hack
