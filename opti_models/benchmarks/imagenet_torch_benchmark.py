@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+import json
 import logging
+import os
 import typing as t
 from argparse import ArgumentParser
 from time import perf_counter
@@ -23,6 +25,7 @@ class TorchBenchmark:
     def __init__(
         self,
         model_name: str,
+        export_name: str = None,
         batch_size: t.Optional[int] = 1,
         in_size: t.Tuple = (224, 224),
         workers: t.Optional[int] = 1,
@@ -38,13 +41,14 @@ class TorchBenchmark:
             show_model_info: Flag to chow model info
         """
         self.model_name = model_name
+        self.export_name = export_name
         self.batch_size = batch_size
         self.workers = workers
         self.in_size = in_size
         self.show_model_info = show_model_info
 
     def _make_dataloader(self, data_df: pd.DataFrame) -> DataLoader:
-        dataset_obj = ImagenetDataset(data_df=data_df, in_size=self.in_size)
+        dataset_obj = ImagenetDataset(data_df=data_df[:100], in_size=self.in_size)
         dataloader = DataLoader(
             dataset=dataset_obj,
             batch_size=self.batch_size,
@@ -80,9 +84,21 @@ class TorchBenchmark:
             preds = preds.data.cpu().numpy()
             preds_dict.update({name: label for name, label in zip(names, preds)})
 
-        logging.info(f"\tAverage images per second: {self.batch_size / np.mean(avg_batch_time):.4f} image/s")
-        logging.info(f"\tAverage second for image: {np.mean(avg_batch_time) * 1000:.4f} ms")
-        return preds_dict
+        ips = self.batch_size / np.mean(avg_batch_time)
+        img_time = np.mean(avg_batch_time) * 1000
+        logging.info(f"\tAverage images per second: {ips:.4f} image/s")
+        logging.info(f"\tAverage second for image: {img_time:.4f} ms")
+
+        out_dict = {'predictions': preds_dict, 'ips': ips, 'img_time': img_time}
+
+        return out_dict
+
+    def _save_statistics(self, out_dict: t.Dict):
+        export_path = os.path.dirname(self.export_name)
+        if not os.path.exists(export_path):
+            os.makedirs(export_path, exist_ok=True)
+        with open(self.export_name, 'w') as f:
+            json.dump(out_dict, f)
 
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
         labels_df = prepare_data(path_to_images=path_to_images)
@@ -92,13 +108,24 @@ class TorchBenchmark:
         dataloader = self._make_dataloader(data_df=labels_df)
 
         logging.info(f"\tTORCH BENCHMARK FOR {self.model_name}: START")
-        preds_dict = self._inference_loop(dataloader=dataloader, model=model)
+        results_dict = self._inference_loop(dataloader=dataloader, model=model)
+        preds_dict = results_dict['predictions']
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
+
+        out_dict = {'ips': results_dict['ips'], 'img_time': results_dict['img_time']}
         for rank, rank_metric in zip(ranks, rank_metrics):
+            out_dict[f"top_{rank}_acc"] = rank_metric * 100
+            out_dict[f"top_{rank}_err"] = (1 - rank_metric) * 100
             logging.info(
-                f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}" f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}"
+                f"\tTOP {rank} ACCURACY: {out_dict[f'top_{rank}_acc']:.2f}"
+                f"\tTOP {rank} ERROR: {out_dict[f'top_{rank}_err']:.2f}"
             )
         logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
+
+        # Save statistics
+        if self.export_name is not None:
+            self._save_statistics(out_dict=out_dict)
+            logging.info(f"\tBENCHMARK STATS WERE SAVED AT {self.export_name}")
 
 
 def parse_args():
@@ -111,6 +138,13 @@ def parse_args():
         type=str,
         required=True,
         help=f"Name of the model to test. Available: {show_available_backbones()}",
+    )
+    parser.add_argument(
+        '--export-name',
+        type=str,
+        required=False,
+        default=None,
+        help="File where to store bench statistics. " "If None, no statistics will be saved. Default: None",
     )
     parser.add_argument(
         '--path-to-images',
@@ -131,7 +165,11 @@ def parse_args():
 
 def main(args):
     bench_obj = TorchBenchmark(
-        model_name=args.model_name, batch_size=args.batch_size, workers=args.workers, in_size=args.size
+        model_name=args.model_name,
+        export_name=args.export_name,
+        batch_size=args.batch_size,
+        workers=args.workers,
+        in_size=args.size,
     )
     bench_obj.process(path_to_images=args.path_to_images)
     del bench_obj
