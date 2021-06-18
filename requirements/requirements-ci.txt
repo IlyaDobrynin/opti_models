@@ -10,3 +10,4 @@ onnx-simplifier==0.2.18
 scikit_image>=0.14.2
 requests==2.21.0
 pytest==6.2.1
+timm>=0.4.9
