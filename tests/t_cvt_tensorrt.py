@@ -23,10 +23,13 @@ def cvt_all():
 
     trt_dir = "data/trt-export"
     onnx_models = "data/onnx-export"
+
+    included_names = [name for name in show_available_backbones()]
+    excluded_names = []
     model_names = [
         name
-        for name in show_available_backbones()
-        if (name in os.listdir(onnx_models)) and (name not in os.listdir(trt_dir))
+        for name in included_names
+        if (name not in excluded_names) and (name in os.listdir(onnx_models)) and (name not in os.listdir(trt_dir))
     ]
     onnx_models = "data/onnx-export"
     for i, model_name in enumerate(model_names):

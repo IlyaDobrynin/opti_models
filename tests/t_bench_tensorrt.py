@@ -67,6 +67,7 @@ def combine_statistics(trt_models_path: str):
 def bench_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
 
+    included_names = [name for name in show_available_backbones()]
     excluded_names = [
         'efficientnet_b1b',
         'efficientnet_b2b',
@@ -87,9 +88,7 @@ def bench_all():
     ]
     trt_models_path = "data/trt-export"
     model_names = [
-        name
-        for name in show_available_backbones()
-        if (name not in excluded_names) and (name in os.listdir(trt_models_path))
+        name for name in included_names if (name not in excluded_names) and (name in os.listdir(trt_models_path))
     ]
     for i, model_name in enumerate(model_names):
         logging.info(f"\t{i + 1}/{len(model_names)}: {model_name.upper()}")
