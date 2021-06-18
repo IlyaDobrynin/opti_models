@@ -216,6 +216,7 @@ bench-torch --model-name MODEL-NAME
 ```
 Parameters cheatsheet:
 - `model-name` (str, required) - name of the model to test.
+- `export-name` (str, optional) - file where to store bench statistics. If None, no statistics will be saved. Default: None
 - `path-to-images` (str, optional) - path to the validation set. Default - `/usr/local/opti_models/imagenetv2-top-images-format-val`.
 - `size` (int int, optional) - Image size. Default: `224 224`.
 - `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
@@ -227,6 +228,7 @@ bench-trt --trt-path TRT-PATH
 ```
 Parameters cheatsheet:
 - `trt-path` (str, required) - path to the TensorRT model.
+- `export-name` - file where to store bench statistics. If None, no statistics will be saved. Default: None
 - `path-to-images` (str, required) - path to the validation set. Default - `/usr/local/opti_models/imagenetv2-top-images-format-val`.
 
 </details>

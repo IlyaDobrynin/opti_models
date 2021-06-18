@@ -144,7 +144,7 @@ def parse_args():
         type=str,
         required=False,
         default=None,
-        help="File where to store bench statistics. " "If None, no statistics will be saved. Default: None",
+        help="File where to store bench statistics. If None, no statistics will be saved. Default: None",
     )
     parser.add_argument(
         '--path-to-images',
