@@ -50,6 +50,13 @@ from . import (  # Torchvision models
     resnet152,
     resnext50_32x4d,
     resnext101_32x8d,
+    timm_res2net50_14w_8s,
+    timm_res2net50_26w_4s,
+    timm_res2net50_26w_6s,
+    timm_res2net50_26w_8s,
+    timm_res2net50_48w_2s,
+    timm_res2net101_26w_4s,
+    timm_res2next50,
     vgg11,
     vgg11_bn,
     vgg13,
@@ -125,6 +132,14 @@ BACKBONES = {
     'genet_small': genet_small,
     'genet_normal': genet_normal,
     'genet_large': genet_large,
+    # TIMM MODELS
+    'timm_res2net50_14w_8s': timm_res2net50_14w_8s,
+    'timm_res2net50_26w_4s': timm_res2net50_26w_4s,
+    'timm_res2net50_26w_6s': timm_res2net50_26w_6s,
+    'timm_res2net50_26w_8s': timm_res2net50_26w_8s,
+    'timm_res2net50_48w_2s': timm_res2net50_48w_2s,
+    'timm_res2net101_26w_4s': timm_res2net101_26w_4s,
+    'timm_res2next50': timm_res2next50,
 }
 
 
