@@ -1,11 +1,9 @@
 import argparse
-import json
 import logging
 import os
 
-import pandas as pd
-
 from opti_models.benchmarks.imagenet_tensorrt_benchmark import main
+from opti_models.utils.benchmarks_utils import combine_statistics
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,38 +28,6 @@ def get_precision(trt_model_name: str):
     if precision is None:
         raise ValueError(f"Can't find precision in trt_model_name: {trt_model_name}")
     return precision
-
-
-def combine_statistics(trt_models_path: str):
-
-    stats_dict = {}
-    for path, folders, files in os.walk(trt_models_path):
-        if (len(files) > 0) and (all([file.endswith('.json') for file in files])):
-            model_name = path.split(os.sep)[-2]
-            stats_dict[model_name] = {}
-            for file in files:
-                precision = file.split("_")[0]
-                with open(os.path.join(path, file)) as f:
-                    stats = json.load(f)
-                stats_dict[model_name][precision] = {k: v for k, v in stats.items()}
-
-    out_df = pd.DataFrame()
-    out_df['model_name'] = [model_name for model_name in stats_dict.keys() for _ in stats_dict[model_name].keys()]
-    out_df['precision'] = [
-        precision for model_name in stats_dict.keys() for precision in sorted(stats_dict[model_name].keys())
-    ]
-
-    df_dict = {}
-    for model_name in stats_dict.keys():
-        for precision in sorted(stats_dict[model_name].keys()):
-            for key, value in stats_dict[model_name][precision].items():
-                if key not in df_dict:
-                    df_dict[key] = [value]
-                else:
-                    df_dict[key].append(value)
-    for key, values in df_dict.items():
-        out_df[key] = values
-    return out_df
 
 
 def bench_all():

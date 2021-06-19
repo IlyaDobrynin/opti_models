@@ -1,3 +1,4 @@
+import json
 import os
 import typing as t
 
@@ -108,3 +109,33 @@ def compute_metrics(trues_df: pd.DataFrame, preds: t.Dict, top_n_ranks: t.Tuple 
         pred_labels.append(preds[name])
 
     return (top_n_accuracy(preds=pred_labels, truths=true_labels, n=rank) for rank in top_n_ranks)
+
+
+def combine_statistics(trt_models_path: str, excluded_stats: t.List = ('top_1_err', 'top_5_err')) -> pd.DataFrame:
+    stats_dict = {}
+    for path, folders, files in os.walk(trt_models_path):
+        if (len(files) > 0) and (all([file.endswith('.json') for file in files])):
+            model_name = path.split(os.sep)[-2]
+            stats_dict[model_name] = {}
+            for file in files:
+                precision = file.split("_")[0]
+                with open(os.path.join(path, file)) as f:
+                    stats = json.load(f)
+                stats_dict[model_name][precision] = {k: v for k, v in stats.items()}
+    out_df = pd.DataFrame()
+    out_df['model_name'] = [model_name for model_name in stats_dict.keys()]
+
+    df_dict = {'32': {}, '16': {}, '8': {}}
+    for model_name in stats_dict.keys():
+        for precision in sorted(stats_dict[model_name].keys()):
+            for key, value in stats_dict[model_name][precision].items():
+                if key not in excluded_stats:
+                    if key not in df_dict[precision]:
+                        df_dict[precision][key] = [value]
+                    else:
+                        df_dict[precision][key].append(value)
+
+    for precision, values_dict in df_dict.items():
+        for k, v in values_dict.items():
+            out_df[f"{precision}_{k}"] = v
+    return out_df

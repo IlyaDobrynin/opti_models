@@ -27,15 +27,19 @@ logging.basicConfig(level=logging.INFO)
 TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 
 
+__all__ = ['TensorRTBenchmark']
+
+
 class TensorRTBenchmark:
-    def __init__(self, trt_path: str, export_name: str):
+    def __init__(self, trt_path: str, export_name: str = None):
         """Class for simple TensorRT benchmarking
 
         Args:
             trt_path: Path to converted TensorRT model
+            export_name: File where to store bench statistics. If None, no statistics will be saved
         """
         self.model_name = trt_path.split("/")[-2]
-
+        self.export_name = export_name
         self.trt_runtime = trt.Runtime(TRT_LOGGER)
         self.trt_engine = load_engine(trt_runtime=self.trt_runtime, engine_path=trt_path)
         self.context = self.trt_engine.create_execution_context()
@@ -48,7 +52,6 @@ class TensorRTBenchmark:
         input_volume = trt.volume((c, w, h))
         self.numpy_array = np.zeros((self.max_batch_size, input_volume))
         self.batch_size = bs
-
         self.augmentations = Compose(
             [
                 Resize(height=h, width=w, interpolation=cv2.INTER_AREA),
@@ -57,9 +60,19 @@ class TensorRTBenchmark:
             p=1,
         )
 
-        self.export_name = export_name
-
     def _load_images(self, labels_df: pd.DataFrame, idx: int) -> t.Tuple[np.ndarray, t.List, int]:
+        """Load images and returns images list, names list and batch size
+
+        Args:
+            labels_df: DataFrame of input labels: ['names', 'labels']
+            idx: Batch index
+
+        Returns:
+            images: no.array of images
+            names: list of paths to images
+            bs: current batch size
+
+        """
         idx_start = idx
         idx_stop = min(idx + self.max_batch_size, labels_df.shape[0])
         bs = idx_stop - idx_start
@@ -80,6 +93,14 @@ class TensorRTBenchmark:
         return images, names, bs
 
     def _inference_loop(self, labels_df: pd.DataFrame) -> t.Dict:
+        """Simple inference loop method
+
+        Args:
+            labels_df: DataFrame of input labels: ['names', 'labels']
+
+        Returns:
+            out_dict: Dictionary with predictions and statistics
+        """
         preds_dict = {}
         avg_batch_time = []
         for idx in tqdm(range(0, labels_df.shape[0], self.max_batch_size)):
@@ -102,12 +123,13 @@ class TensorRTBenchmark:
             avg_batch_time.append(end - start)
             preds_dict.update({name: label for name, label in zip(names, preds)})
             del preds
-        ips = self.batch_size / np.mean(avg_batch_time)
-        img_time = np.mean(avg_batch_time) * 1000
-        logging.info(f"\tAverage images per second: {ips:.4f} image/s")
-        logging.info(f"\tAverage second for image: {img_time:.4f} ms")
 
-        out_dict = {'predictions': preds_dict, 'ips': ips, 'img_time': img_time}
+        images_per_second = self.batch_size / np.mean(avg_batch_time)
+        ms_per_image = np.mean(avg_batch_time) * 1000
+        logging.info(f"\tAverage images per second: {images_per_second:.4f} image/s")
+        logging.info(f"\tAverage second for image: {ms_per_image:.4f} ms")
+
+        out_dict = {'predictions': preds_dict, 'images_per_second': images_per_second, 'ms_per_image': ms_per_image}
         return out_dict
 
     def _save_statistics(self, out_dict: t.Dict):
@@ -118,15 +140,23 @@ class TensorRTBenchmark:
             json.dump(out_dict, f)
 
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)) -> t.Dict:
+        # Prepare labels dataframe
         labels_df = prepare_data(path_to_images=path_to_images)
 
         logging.info(f"\tTENSORRT BENCHMARK FOR {self.model_name}: START")
+
+        # Make prediction loop
         results_dict = self._inference_loop(labels_df=labels_df)
         preds_dict = results_dict['predictions']
 
+        # Get metrics
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
 
-        out_dict = {'ips': results_dict['ips'], 'img_time': results_dict['img_time']}
+        # Fill out_dict
+        out_dict = {
+            'images_per_second': results_dict['images_per_second'],
+            'ms_per_image': results_dict['ms_per_image'],
+        }
         for rank, rank_metric in zip(ranks, rank_metrics):
             out_dict[f"top_{rank}_acc"] = rank_metric * 100
             out_dict[f"top_{rank}_err"] = (1 - rank_metric) * 100
@@ -154,6 +184,7 @@ def parse_args():
     # Default args
     path = "/usr/local/opti_models/imagenetv2-top-images-format-val"
     parser = ArgumentParser(description='Simple speed benchmark, based on TRT models')
+
     parser.add_argument('--trt-path', required=True, type=str, help="Path to TRT model")
     parser.add_argument(
         '--export-name',

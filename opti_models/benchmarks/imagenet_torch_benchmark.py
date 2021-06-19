@@ -21,6 +21,9 @@ from opti_models.utils.model_utils import get_model
 logging.basicConfig(level=logging.INFO)
 
 
+__all__ = ['TorchBenchmark']
+
+
 class TorchBenchmark:
     def __init__(
         self,
@@ -84,12 +87,12 @@ class TorchBenchmark:
             preds = preds.data.cpu().numpy()
             preds_dict.update({name: label for name, label in zip(names, preds)})
 
-        ips = self.batch_size / np.mean(avg_batch_time)
-        img_time = np.mean(avg_batch_time) * 1000
-        logging.info(f"\tAverage images per second: {ips:.4f} image/s")
-        logging.info(f"\tAverage second for image: {img_time:.4f} ms")
+        images_per_second = self.batch_size / np.mean(avg_batch_time)
+        ms_per_image = np.mean(avg_batch_time) * 1000
+        logging.info(f"\tAverage images per second: {images_per_second:.4f} image/s")
+        logging.info(f"\tAverage second for image: {ms_per_image:.4f} ms")
 
-        out_dict = {'predictions': preds_dict, 'ips': ips, 'img_time': img_time}
+        out_dict = {'predictions': preds_dict, 'images_per_second': images_per_second, 'ms_per_image': ms_per_image}
 
         return out_dict
 
@@ -112,7 +115,10 @@ class TorchBenchmark:
         preds_dict = results_dict['predictions']
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
 
-        out_dict = {'ips': results_dict['ips'], 'img_time': results_dict['img_time']}
+        out_dict = {
+            'images_per_second': results_dict['images_per_second'],
+            'ms_per_image': results_dict['ms_per_image'],
+        }
         for rank, rank_metric in zip(ranks, rank_metrics):
             out_dict[f"top_{rank}_acc"] = rank_metric * 100
             out_dict[f"top_{rank}_err"] = (1 - rank_metric) * 100

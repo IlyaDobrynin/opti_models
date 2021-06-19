@@ -214,4 +214,9 @@ def get_backbone(name, *args, **kwargs):
 
 
 def show_available_backbones():
+    """Simple returns all available model names
+
+    Returns:
+        List of available model names
+    """
     return list(BACKBONES.keys())

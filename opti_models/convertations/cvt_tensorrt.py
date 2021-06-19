@@ -173,18 +173,12 @@ def make_trt_convertation(
 
 
 def main(args):
-    onnx_model_path = args.onnx_path
-    precision = args.precision
-    export_name = args.export_name
-    verbose = args.verbose
-    calibration_images_dir = args.calibration_images_dir
-
     make_trt_convertation(
-        precision=precision,
-        export_name=export_name,
-        onnx_model_path=onnx_model_path,
-        verbose=verbose,
-        calibration_images_dir=calibration_images_dir,
+        precision=args.precision,
+        export_name=args.export_name,
+        onnx_model_path=args.onnx_path,
+        verbose=args.verbose,
+        calibration_images_dir=args.calibration_images_dir,
     )
 
 
