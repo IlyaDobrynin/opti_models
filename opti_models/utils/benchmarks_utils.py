@@ -111,7 +111,9 @@ def compute_metrics(trues_df: pd.DataFrame, preds: t.Dict, top_n_ranks: t.Tuple 
     return (top_n_accuracy(preds=pred_labels, truths=true_labels, n=rank) for rank in top_n_ranks)
 
 
-def combine_statistics(trt_models_path: str, excluded_stats: t.List = ('top_1_err', 'top_5_err')) -> pd.DataFrame:
+def combine_statistics(
+    trt_models_path: str, excluded_stats: t.List = ('top_1_err', 'top_5_err'), sort_by: str = '16_images_per_second'
+) -> pd.DataFrame:
     stats_dict = {}
     for path, folders, files in os.walk(trt_models_path):
         if (len(files) > 0) and (all([file.endswith('.json') for file in files])):
@@ -138,4 +140,5 @@ def combine_statistics(trt_models_path: str, excluded_stats: t.List = ('top_1_er
     for precision, values_dict in df_dict.items():
         for k, v in values_dict.items():
             out_df[f"{precision}_{k}"] = v
+    out_df.sort_values(by=sort_by)
     return out_df
