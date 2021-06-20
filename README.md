@@ -191,7 +191,7 @@ cvt-trt --onnx-path data/onnx_export/resnet18/resnet18_bs-1_res-3x224x224_simpli
 ## Models
 [Back to Content](#Content)
 
-For list of all models see [MODELS.md](/opti_models/models/MODELS.md). <br>
+For list of all models see [MODELS.md](MODELS.md). <br>
 There you can find list of all available pretrained backbones and results of benchmarks for this models.
 
 ## Benchmarks

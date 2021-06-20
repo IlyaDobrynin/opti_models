@@ -10,8 +10,16 @@ from time import perf_counter
 import cv2
 import numpy as np
 import pandas as pd
-import pycuda.driver as cuda
-import tensorrt as trt
+
+try:
+    import pycuda.driver as cuda
+except Exception:
+    logging.warning(f"\tCan't import pycuda")
+try:
+    import tensorrt as trt
+except Exception:
+    logging.warning(f"\tCan't import tensorrt")
+
 from albumentations import Compose, Normalize, Resize
 from tqdm import tqdm
 

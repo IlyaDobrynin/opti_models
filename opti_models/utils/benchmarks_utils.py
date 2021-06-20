@@ -140,5 +140,5 @@ def combine_statistics(
     for precision, values_dict in df_dict.items():
         for k, v in values_dict.items():
             out_df[f"{precision}_{k}"] = v
-    out_df.sort_values(by=sort_by)
+    out_df.sort_values(by=[sort_by], inplace=True, ascending=False, ignore_index=True)
     return out_df
