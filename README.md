@@ -22,17 +22,17 @@ Repo for the easy-way models convertation.
 
 0. Clone the repo:
 ```
-git clone git@github.com:IlyaDobrynin/opti_models.git && cd opti_models
-git checkout dev
+git clone https://github.com/IlyaDobrynin/opti_models.git && cd opti_models
 ```
 ### With Docker
 [Back to Content](#Content)
 
+**We highly advice you to work with this project inside the Docker that we've built for you, since
+there are tested dependencies.
+Otherwise, we can't guarantee that it will work due to various environmental reasons.**
+
 <details>
 <summary>Expand</summary>
-
-We highly advice you to work with this project inside the Docker that we've built for you.
-Otherwise, we can't guarantee that it will work due to various environmental reasons.
 
 Steps for work with docker:
 1. Set up Docker:
@@ -50,13 +50,32 @@ and place in to the `/usr/local/opti_models` directory. Details [here](#1-prepar
 4. Run docker container:
     - Without mounting data folder for benchmarks:
         ```
-        docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -it opti_models
+        bash run_docker_no-images.sh <PROJECT_DIR> <CONTAINER_VERSION:-latest>
+
+        or
+
+        docker run \
+           --gpus all \
+           --ipc=host \
+           -v <PROJECT_DIR>:/workspace \
+           -it opti_models
         ```
     - With mounting data folder for benchmarks (only if you have step 3 done):
         ```
-        docker run --gpus all --ipc=host -v PROJECT_DIR:/workspace -v /usr/local/opti_models/:/usr/local/opti_models/ -it opti_models
+        bash run_docker.sh <PROJECT_DIR> <CONTAINER_VERSION:-latest> <DATA_STORAGE:-/usr/local/opti_models>
+
+        or
+
+        docker run \
+           --gpus all \
+           --ipc=host \
+           -v <PROJECT_DIR>:/workspace \
+           -v <STORAGE>:/usr/local/opti_models/ \
+           -it opti_models
         ```
-    Where PROJECT_DIR is the directory, where opti_models is located
+- <PROJECT_DIR> - directory, where opti_models is located
+- <CONTAINER_VERSION> - version of the container, default - latest
+- <DATA_STORAGE> - directory with the calibration and validation images, default - /usr/local/opti_models
 
 </details>
 
@@ -74,9 +93,9 @@ source venv/bin/activate
 2. Install dependencies
 ````
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements/requirements.txt
 pip install nvidia-pyindex
-pip install --upgrade nvidia-tensorrt
+pip install nvidia-tensorrt==7.2.2.3
 pip install -e .
 ````
 
@@ -172,7 +191,7 @@ cvt-trt --onnx-path data/onnx_export/resnet18/resnet18_bs-1_res-3x224x224_simpli
 ## Models
 [Back to Content](#Content)
 
-For list of all models see [MODELS.md](/opti_models/models/MODELS.md). <br>
+For list of all models see [MODELS.md](MODELS.md). <br>
 There you can find list of all available pretrained backbones and results of benchmarks for this models.
 
 ## Benchmarks
@@ -198,6 +217,7 @@ bench-torch --model-name MODEL-NAME
 ```
 Parameters cheatsheet:
 - `model-name` (str, required) - name of the model to test.
+- `export-name` (str, optional) - file where to store bench statistics. If None, no statistics will be saved. Default: None
 - `path-to-images` (str, optional) - path to the validation set. Default - `/usr/local/opti_models/imagenetv2-top-images-format-val`.
 - `size` (int int, optional) - Image size. Default: `224 224`.
 - `batch-size` (int, optional) - Batch size for converted model. Default: `1`.
@@ -209,6 +229,7 @@ bench-trt --trt-path TRT-PATH
 ```
 Parameters cheatsheet:
 - `trt-path` (str, required) - path to the TensorRT model.
+- `export-name` - file where to store bench statistics. If None, no statistics will be saved. Default: None
 - `path-to-images` (str, required) - path to the validation set. Default - `/usr/local/opti_models/imagenetv2-top-images-format-val`.
 
 </details>

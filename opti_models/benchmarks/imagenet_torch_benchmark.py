@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+import json
 import logging
+import os
 import typing as t
 from argparse import ArgumentParser
-from time import time
+from time import perf_counter
 
 import numpy as np
 import pandas as pd
@@ -19,22 +21,36 @@ from opti_models.utils.model_utils import get_model
 logging.basicConfig(level=logging.INFO)
 
 
-class SimpleBenchmark:
+__all__ = ['TorchBenchmark']
+
+
+class TorchBenchmark:
     def __init__(
         self,
         model_name: str,
+        export_name: str = None,
         batch_size: t.Optional[int] = 1,
         in_size: t.Tuple = (224, 224),
         workers: t.Optional[int] = 1,
         show_model_info: bool = False,
     ):
+        """Class for simple torch benchmarking
+
+        Args:
+            model_name: Name of the model to bench
+            batch_size: Batch size
+            in_size: Image input size
+            workers: Number of workers in dataloader
+            show_model_info: Flag to chow model info
+        """
         self.model_name = model_name
+        self.export_name = export_name
         self.batch_size = batch_size
         self.workers = workers
         self.in_size = in_size
         self.show_model_info = show_model_info
 
-    def _make_dataloader(self, data_df: pd.DataFrame):
+    def _make_dataloader(self, data_df: pd.DataFrame) -> DataLoader:
         dataset_obj = ImagenetDataset(data_df=data_df, in_size=self.in_size)
         dataloader = DataLoader(
             dataset=dataset_obj,
@@ -46,23 +62,46 @@ class SimpleBenchmark:
         )
         return dataloader
 
-    def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module):
+    @staticmethod
+    def _prediction_step(model: torch.nn.Module, inputs: torch.Tensor) -> torch.Tensor:
+        preds = model(inputs)
+        preds = F.softmax(preds, dim=-1)
+        return preds
+
+    def _inference_loop(self, dataloader: DataLoader, model: torch.nn.Module) -> t.Dict:
         preds_dict = {}
         avg_batch_time = []
+
+        torch.cuda.synchronize()
         model.eval()
         for batch in tqdm(dataloader, total=len(dataloader)):
             inputs = batch[0].cuda()
             names = batch[2]
-
-            batch_time = time()
-            preds = model(inputs)
-            preds = F.softmax(preds, dim=-1)
-            avg_batch_time.append(time() - batch_time)
+            start = perf_counter()
+            preds = self._prediction_step(model=model, inputs=inputs)
+            torch.cuda.synchronize()
+            end = perf_counter()
+            time = end - start
+            avg_batch_time.append(time)
 
             preds = preds.data.cpu().numpy()
             preds_dict.update({name: label for name, label in zip(names, preds)})
-        logging.info(f"\tAverage fps: {self.batch_size / np.mean(avg_batch_time)}")
-        return preds_dict
+
+        images_per_second = self.batch_size / np.mean(avg_batch_time)
+        ms_per_image = np.mean(avg_batch_time) * 1000
+        logging.info(f"\tAverage images per second: {images_per_second:.4f} image/s")
+        logging.info(f"\tAverage second for image: {ms_per_image:.4f} ms")
+
+        out_dict = {'predictions': preds_dict, 'images_per_second': images_per_second, 'ms_per_image': ms_per_image}
+
+        return out_dict
+
+    def _save_statistics(self, out_dict: t.Dict):
+        export_path = os.path.dirname(self.export_name)
+        if not os.path.exists(export_path):
+            os.makedirs(export_path, exist_ok=True)
+        with open(self.export_name, 'w') as f:
+            json.dump(out_dict, f)
 
     def process(self, path_to_images: str, ranks: t.Tuple = (1, 5)):
         labels_df = prepare_data(path_to_images=path_to_images)
@@ -72,13 +111,27 @@ class SimpleBenchmark:
         dataloader = self._make_dataloader(data_df=labels_df)
 
         logging.info(f"\tTORCH BENCHMARK FOR {self.model_name}: START")
-        preds_dict = self._inference_loop(dataloader=dataloader, model=model)
+        results_dict = self._inference_loop(dataloader=dataloader, model=model)
+        preds_dict = results_dict['predictions']
         rank_metrics = compute_metrics(trues_df=labels_df, preds=preds_dict, top_n_ranks=ranks)
+
+        out_dict = {
+            'images_per_second': results_dict['images_per_second'],
+            'ms_per_image': results_dict['ms_per_image'],
+        }
         for rank, rank_metric in zip(ranks, rank_metrics):
+            out_dict[f"top_{rank}_acc"] = rank_metric * 100
+            out_dict[f"top_{rank}_err"] = (1 - rank_metric) * 100
             logging.info(
-                f"\tTOP {rank} ACCURACY: {rank_metric * 100:.2f}" f"\tTOP {rank} ERROR: {(1 - rank_metric) * 100:.2f}"
+                f"\tTOP {rank} ACCURACY: {out_dict[f'top_{rank}_acc']:.2f}"
+                f"\tTOP {rank} ERROR: {out_dict[f'top_{rank}_err']:.2f}"
             )
         logging.info(f"\tBENCHMARK FOR {self.model_name}: SUCCESS")
+
+        # Save statistics
+        if self.export_name is not None:
+            self._save_statistics(out_dict=out_dict)
+            logging.info(f"\tBENCHMARK STATS WERE SAVED AT {self.export_name}")
 
 
 def parse_args():
@@ -91,6 +144,13 @@ def parse_args():
         type=str,
         required=True,
         help=f"Name of the model to test. Available: {show_available_backbones()}",
+    )
+    parser.add_argument(
+        '--export-name',
+        type=str,
+        required=False,
+        default=None,
+        help="File where to store bench statistics. If None, no statistics will be saved. Default: None",
     )
     parser.add_argument(
         '--path-to-images',
@@ -110,10 +170,16 @@ def parse_args():
 
 
 def main(args):
-    bench_obj = SimpleBenchmark(
-        model_name=args.model_name, batch_size=args.batch_size, workers=args.workers, in_size=args.size
+    bench_obj = TorchBenchmark(
+        model_name=args.model_name,
+        export_name=args.export_name,
+        batch_size=args.batch_size,
+        workers=args.workers,
+        in_size=args.size,
     )
     bench_obj.process(path_to_images=args.path_to_images)
+    del bench_obj
+    torch.cuda.empty_cache()
 
 
 if __name__ == '__main__':

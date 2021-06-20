@@ -1,10 +1,20 @@
+import json
+import logging
 import os
 import typing as t
+
 import numpy as np
 import pandas as pd
-import tensorrt as trt
-import pycuda.autoinit
-import pycuda.driver as cuda
+
+try:
+    import pycuda.autoinit
+    import pycuda.driver as cuda
+except Exception:
+    logging.warning(f"\tCan't import pycuda")
+try:
+    import tensorrt as trt
+except Exception:
+    logging.warning(f"\tCan't import tensorrt")
 
 
 class HostDeviceMem:
@@ -23,7 +33,6 @@ def load_engine(trt_runtime, engine_path):
     with open(engine_path, 'rb') as f:
         engine_data = f.read()
     engine = trt_runtime.deserialize_cuda_engine(engine_data)
-    print(engine)
     return engine
 
 
@@ -68,7 +77,7 @@ def allocate_buffers(engine):
     return inputs, outputs, bindings, stream
 
 
-def get_shapes(engine: trt.ICudaEngine):
+def get_shapes(engine):
     sizes = []
     for binding in engine:
         sizes.append(trt.volume(engine.get_binding_shape(binding)))
@@ -100,11 +109,7 @@ def top_n_accuracy(preds: t.List, truths: t.List, n: int):
     return float(successes) / len(truths)
 
 
-def compute_metrics(
-        trues_df: pd.DataFrame,
-        preds: t.Dict,
-        top_n_ranks: t.Tuple = (1, 5)
-):
+def compute_metrics(trues_df: pd.DataFrame, preds: t.Dict, top_n_ranks: t.Tuple = (1, 5)):
     true_labels = []
     pred_labels = []
     for name in preds.keys():
@@ -112,3 +117,36 @@ def compute_metrics(
         pred_labels.append(preds[name])
 
     return (top_n_accuracy(preds=pred_labels, truths=true_labels, n=rank) for rank in top_n_ranks)
+
+
+def combine_statistics(
+    trt_models_path: str, excluded_stats: t.List = ('top_1_err', 'top_5_err'), sort_by: str = '16_images_per_second'
+) -> pd.DataFrame:
+    stats_dict = {}
+    for path, folders, files in os.walk(trt_models_path):
+        if (len(files) > 0) and (all([file.endswith('.json') for file in files])):
+            model_name = path.split(os.sep)[-2]
+            stats_dict[model_name] = {}
+            for file in files:
+                precision = file.split("_")[0]
+                with open(os.path.join(path, file)) as f:
+                    stats = json.load(f)
+                stats_dict[model_name][precision] = {k: v for k, v in stats.items()}
+    out_df = pd.DataFrame()
+    out_df['model_name'] = [model_name for model_name in stats_dict.keys()]
+
+    df_dict = {'32': {}, '16': {}, '8': {}}
+    for model_name in stats_dict.keys():
+        for precision in sorted(stats_dict[model_name].keys()):
+            for key, value in stats_dict[model_name][precision].items():
+                if key not in excluded_stats:
+                    if key not in df_dict[precision]:
+                        df_dict[precision][key] = [value]
+                    else:
+                        df_dict[precision][key].append(value)
+
+    for precision, values_dict in df_dict.items():
+        for k, v in values_dict.items():
+            out_df[f"{precision}_{k}"] = v
+    out_df.sort_values(by=[sort_by], inplace=True, ascending=False, ignore_index=True)
+    return out_df

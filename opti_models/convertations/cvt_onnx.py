@@ -22,7 +22,7 @@ def get_parameters(export_name: str, model_name: str, batch_size: int, in_size: 
     export_dir = os.path.join('data/onnx-export', model_name)
     if not os.path.exists(export_dir):
         os.makedirs(export_dir, exist_ok=True)
-    if not export_name:
+    if not export_name or export_name is None:
         out_model_name = f"{model_name}_bs-{batch_size}_res-{in_size[0]}x{in_size[1]}x{in_size[2]}"
     else:
         out_model_name = export_name
@@ -33,11 +33,11 @@ def get_parameters(export_name: str, model_name: str, batch_size: int, in_size: 
 
 
 def make_onnx_convertation(
-    export_name: str,
     batch_size: int,
     model_name: str,
     in_size: t.Tuple,
     model_type: str,
+    export_name: str = None,
     num_classes: t.Optional[int] = 1000,
     model_path: t.Optional[str] = None,
     model: t.Optional[torch.nn.Module] = None,
@@ -126,24 +126,15 @@ def make_onnx_convertation(
 
 
 def main(args):
-    model_name = args.model_name
-    batch_size = args.batch_size
-    in_size = args.size
-    model_type = args.model_type
-    num_classes = args.num_classes
-    model_path = args.model_path
-    export_name = args.export_name
-    verbose = args.verbose
-
     make_onnx_convertation(
-        export_name=export_name,
-        batch_size=batch_size,
-        model_name=model_name,
-        in_size=in_size,
-        model_type=model_type,
-        num_classes=num_classes,
-        model_path=model_path,
-        verbose=verbose,
+        export_name=args.export_name,
+        batch_size=args.batch_size,
+        model_name=args.model_name,
+        in_size=args.size,
+        model_type=args.model_type,
+        num_classes=args.num_classes,
+        model_path=args.model_path,
+        verbose=args.verbose,
     )
 
 
@@ -159,9 +150,9 @@ def parse_args():
         '--model-path',
         type=str,
         default='ImageNet',
-        help="Path to the pretrained weights, or ImageNet, " "if you want to get model with imagenet pretrain",
+        help="Path to the pretrained weights, or ImageNet, if you want to get model with imagenet pretrain",
     )
-    parser.add_argument('--export-name', type=str, required=False, help="Name of the exported onnx file")
+    parser.add_argument('--export-name', type=str, required=False, help="Name of the exported onnx file.")
     parser.add_argument(
         '--batch-size', type=int, required=False, default=1, help="Batch size for optimized model. Default 1."
     )

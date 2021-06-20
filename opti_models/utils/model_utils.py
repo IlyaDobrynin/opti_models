@@ -34,7 +34,7 @@ def _patch_last_linear(model: Module, num_classes: int):
 
 def get_model(
     model_type: str,
-    model_name: str,
+    model_name: str = None,
     num_classes: t.Optional[int] = 1000,
     input_shape: t.Optional[t.Tuple] = (3, 224, 224),
     model: t.Optional[Module] = None,
@@ -42,6 +42,23 @@ def get_model(
     classifier_params: t.Optional[t.Dict] = None,
     show: bool = False,
 ) -> torch.nn.Module:
+    """Function returns model class
+
+    Args:
+        model_type: One of the model types. Available: 'classifier', 'opti-classifier', 'custom'. If 'custom',
+                    tou shall provide model class as 'model' argument.
+        model_name: One of the predefined backbones name (see opti_models.show_available_backbones() for details).
+        num_classes: Number of model output classes. Default = 1000. This parameter ignored,
+                    if provide custom model class
+        input_shape: Tuple with imput shape of the model. Default = (3, 224, 224)
+        model: Custom model class. If provided, returns as is.
+        model_path: Path to the custom model weights.
+        classifier_params: Parameters for classifier, if model_type == 'opti-classifier'
+        show:
+
+    Returns:
+        model: Model class, located on the cuda device (if available).
+    """
     if model_type == 'classifier':
         if isinstance(model_path, str) and model_path.lower() == 'imagenet':
             pretrained = True
@@ -89,7 +106,7 @@ def get_model(
     # TODO: Add segmentation, detection, OCR tasks
     else:
         raise NotImplementedError(
-            f"Model type {model_type} not implemented." f"Use one of ['backbone', 'classifier', 'custom']"
+            f"Model type {model_type} not implemented." f"Use one of ['classifier', 'opti-classifier', 'custom']"
         )
 
     if isinstance(model_path, str) and model_path != 'ImageNet':

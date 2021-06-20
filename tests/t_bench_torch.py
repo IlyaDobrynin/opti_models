@@ -24,6 +24,7 @@ def parse_args():
 def bench_all():
     from opti_models.models.backbones.backbone_factory import show_available_backbones
 
+    included_names = [name for name in show_available_backbones()]
     excluded_names = [
         'efficientnet_b1b',
         'efficientnet_b2b',
@@ -42,16 +43,20 @@ def bench_all():
         'efficientnet_b7c',
         'efficientnet_b8c',
     ]
-    model_names = [name for name in show_available_backbones() if name not in excluded_names]
+    model_names = [name for name in included_names if name not in excluded_names]
     for i, model_name in enumerate(model_names):
-        logging.info(f"\t{i + 1}/{len(model_names)}")
+        logging.info(f"\t{i + 1}/{len(model_names)}: {model_name.upper()}")
         args = parse_args()
         args.model_name = model_name
         if model_name == "genet_large":
             args.in_size = (256, 256)
         elif model_name == 'inception_v3':
             args.in_size = (299, 299)
-        main(args=args)
+
+        try:
+            main(args=args)
+        except Exception as e:
+            logging.info(f"\tCan't bench {model_name} \n{repr(e)}")
         logging.info(f"-" * 100)
 
 
