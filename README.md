@@ -27,11 +27,12 @@ git clone https://github.com/IlyaDobrynin/opti_models.git && cd opti_models
 ### With Docker
 [Back to Content](#Content)
 
+**We highly advice you to work with this project inside the Docker that we've built for you, since
+there are tested dependencies.
+Otherwise, we can't guarantee that it will work due to various environmental reasons.**
+
 <details>
 <summary>Expand</summary>
-
-We highly advice you to work with this project inside the Docker that we've built for you.
-Otherwise, we can't guarantee that it will work due to various environmental reasons.
 
 Steps for work with docker:
 1. Set up Docker:
@@ -61,7 +62,7 @@ and place in to the `/usr/local/opti_models` directory. Details [here](#1-prepar
         ```
     - With mounting data folder for benchmarks (only if you have step 3 done):
         ```
-        bash run_docker.sh <PROJECT_DIR> <CONTAINER_VERSION:-latest> <STORAGE:-/usr/local/opti_models>
+        bash run_docker.sh <PROJECT_DIR> <CONTAINER_VERSION:-latest> <DATA_STORAGE:-/usr/local/opti_models>
 
         or
 
@@ -72,9 +73,9 @@ and place in to the `/usr/local/opti_models` directory. Details [here](#1-prepar
            -v <STORAGE>:/usr/local/opti_models/ \
            -it opti_models
         ```
-    Where <PROJECT_DIR> - directory, where opti_models is located
-          <CONTAINER_VERSION> - version of the container, default - latest
-          <STORAGE> - directory with the calibration and validation images, default - /usr/local/opti_models
+- <PROJECT_DIR> - directory, where opti_models is located
+- <CONTAINER_VERSION> - version of the container, default - latest
+- <DATA_STORAGE> - directory with the calibration and validation images, default - /usr/local/opti_models
 
 </details>
 
