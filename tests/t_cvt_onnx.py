@@ -33,6 +33,8 @@ def cvt_all():
     included_names = [name for name in show_available_backbones()]
     excluded_names = []
     onnx_export = 'data/onnx-export'
+    if not os.path.exists(onnx_export):
+        os.makedirs(onnx_export, exist_ok=True)
     model_names = [
         name for name in included_names if (name not in excluded_names) and (name not in os.listdir(onnx_export))
     ]
