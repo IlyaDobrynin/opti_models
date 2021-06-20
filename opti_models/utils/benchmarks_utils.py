@@ -1,12 +1,20 @@
 import json
+import logging
 import os
 import typing as t
 
 import numpy as np
 import pandas as pd
-import pycuda.autoinit
-import pycuda.driver as cuda
-import tensorrt as trt
+
+try:
+    import pycuda.autoinit
+    import pycuda.driver as cuda
+except Exception:
+    logging.warning(f"\tCan't import pycuda")
+try:
+    import tensorrt as trt
+except Exception:
+    logging.warning(f"\tCan't import tensorrt")
 
 
 class HostDeviceMem:
@@ -69,7 +77,7 @@ def allocate_buffers(engine):
     return inputs, outputs, bindings, stream
 
 
-def get_shapes(engine: trt.ICudaEngine):
+def get_shapes(engine):
     sizes = []
     for binding in engine:
         sizes.append(trt.volume(engine.get_binding_shape(binding)))
@@ -140,5 +148,5 @@ def combine_statistics(
     for precision, values_dict in df_dict.items():
         for k, v in values_dict.items():
             out_df[f"{precision}_{k}"] = v
-    out_df.sort_values(by=sort_by)
+    out_df.sort_values(by=[sort_by], inplace=True, ascending=False, ignore_index=True)
     return out_df

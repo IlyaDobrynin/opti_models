@@ -78,6 +78,9 @@ def bench_all():
         logging.info(f"-" * 100)
 
     statistics_df = combine_statistics(trt_models_path=trt_models_path)
+    for col_name in statistics_df.columns:
+        if col_name not in 'model_name':
+            statistics_df[col_name].applymap('{:.4f}'.format)
     statistics_df.to_csv(os.path.join(trt_models_path, "statistics.csv"), index=False)
 
 

@@ -3,11 +3,16 @@ import argparse
 import gc
 import logging
 import os
-import typing as t
 
-import tensorrt as trt
+try:
+    import tensorrt as trt
 
-from opti_models.utils.convertations_utils import Int8EntropyCalibrator, get_input_shape
+    from opti_models.utils.convertations_utils import (
+        Int8EntropyCalibrator,
+        get_input_shape,
+    )
+except Exception:
+    logging.warning(f"\tCan't import tensorrt")
 
 logging.basicConfig(level=logging.INFO)
 sub_prefix = ">>>>> "

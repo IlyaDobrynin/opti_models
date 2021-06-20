@@ -10,7 +10,10 @@ try:
     import pycuda.driver as cuda
 except Exception:
     print("Can't import pycuda")
-import tensorrt as trt
+try:
+    import tensorrt as trt
+except Exception:
+    logging.warning(f"\tCan't import tensorrt")
 
 from ..utils.image_utils import imagenet_preprocess
 
