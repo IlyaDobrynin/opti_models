@@ -50,19 +50,23 @@ if __name__ == '__main__':
     import torch
     from torchsummary import summary
 
-    from opti_models.models.backbones.timm_models.timm_regnet import timm_regnety_320
+    from opti_models.models.backbones.timm_models.timm_resnet import (
+        timm_swsl_resnext101_32x8d,
+    )
 
-    input_size = [3, 223, 224]
-    model = timm_regnety_320(pretrained=False)
+    input_size = [3, 224, 224]
+    model = timm_swsl_resnext101_32x8d(pretrained=False)
     print(model)
 
     for i, (mk, mv) in enumerate(model.named_children()):
         print(i, mk)
-        if mk == 'features':
+        if mk in ['features', 'stages']:
             for j, (fk, fv) in enumerate(mv.named_children()):
                 print(i, j, fk)
 
-    TestNetEncoder_layers = (['stem'], ['s1'], ['s2'], ['s3'], ['s4'])
+    from opti_models.models.backbones.utils.skip_names import RESNEST_LAYERS
+
+    TestNetEncoder_layers = RESNEST_LAYERS
 
     encoder = TestNetEncoder(model, layers=TestNetEncoder_layers)
     encoder.forward(torch.zeros(size=[1] + input_size))

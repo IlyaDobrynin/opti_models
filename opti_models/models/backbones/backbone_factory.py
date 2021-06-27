@@ -84,6 +84,7 @@ from . import (  # Torchvision models
     timm_res2next50,
     timm_resnest14d,
     timm_resnetrs420,
+    timm_swsl_resnext101_32x8d,
     vgg11,
     vgg11_bn,
     vgg13,
@@ -171,6 +172,7 @@ BACKBONES = {
     # Resnet
     'timm_ig_resnext101_32x48d': timm_ig_resnext101_32x48d,
     'timm_resnetrs420': timm_resnetrs420,
+    'timm_swsl_resnext101_32x8d': timm_swsl_resnext101_32x8d,
     # Regnet
     'timm_regnetx_002': timm_regnetx_002,
     'timm_regnetx_004': timm_regnetx_004,

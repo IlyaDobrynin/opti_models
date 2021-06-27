@@ -65,6 +65,7 @@ encoder_dict = {
     # TIMM RESNETS
     'timm_ig_resnext101_32x48d': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
     'timm_resnetrs420': {'skip': RESNET_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
+    'timm_swsl_resnext101_32x8d': {'skip': RESNEST_LAYERS, 'filters': (64, 256, 512, 1024, 2048), 'features': False},
     # TIMM REGNETS
     'timm_regnetx_002': {'skip': REGNET_LAYERS, 'filters': (32, 24, 56, 152, 368), 'features': False},
     'timm_regnetx_004': {'skip': REGNET_LAYERS, 'filters': (32, 32, 64, 160, 384), 'features': False},

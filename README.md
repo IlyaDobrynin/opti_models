@@ -45,7 +45,7 @@ Steps for work with docker:
     ```
     At first it may take a while.
 3. **_OPTIONAL STEP_** If you want to run imagenet benchmarks on the predefined backbones, you need to download data
-and place in to the `/usr/local/opti_models` directory. Details [here](#1-prepare-data)
+and place in to the `/usr/local/opti_models` directory. Details [here](#Benchmarks)
 
 4. Run docker container:
     - Without mounting data folder for benchmarks:
@@ -197,10 +197,11 @@ There you can find list of all available pretrained backbones and results of ben
 ## Benchmarks
 [Back to Content](#Content)
 
-<details>
-<summary>Expand</summary>
 
-### Imagenet
+
+<details>
+<summary>Imagenet</summary>
+
 #### 1. Prepare data
 For all imagenet benchmarks you need to prepare data:
 1. Download data from [GoogleDrive](https://drive.google.com/file/d/1Yi_SZ400LKMXeA08BvDip4qBJonaThae/view?usp=sharing)
