@@ -50,12 +50,12 @@ if __name__ == '__main__':
     import torch
     from torchsummary import summary
 
-    from opti_models.models.backbones.timm_models.timm_resnet import (
-        timm_swsl_resnext101_32x8d,
+    from opti_models.models.backbones.timm_models.timm_effnet import (
+        timm_efficientnet_b0,
     )
 
     input_size = [3, 224, 224]
-    model = timm_swsl_resnext101_32x8d(pretrained=False)
+    model = timm_efficientnet_b0(pretrained=False)
     print(model)
 
     for i, (mk, mv) in enumerate(model.named_children()):
