@@ -1,3 +1,4 @@
+![logo](./logo.jpeg)
 # Opti Models
 Repo for the easy-way models convertation.
 
