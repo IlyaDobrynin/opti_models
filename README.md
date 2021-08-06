@@ -1,4 +1,4 @@
-![logo](https://github.com/IlyaDobrynin/opti_models/blob/master/logo.jpeg)
+![logo](./logo.jpeg)
 # Opti Models
 Repo for the easy-way models convertation.
 
